@@ -20,7 +20,7 @@ class Field:
         It specifies basic attributes and validation requirements that are
         used commonly among most field types
     """
-    def __init__(self, required=False, default=None, validators=[]):
+    def __init__(self, required=False, default=None, validators=None):
         """ Initializes the field with the provided parameters;
 
             A ``required`` field must be provided in the step's data, otherwise
@@ -35,12 +35,14 @@ class Field:
                 All ``validators`` must be derived from the
                 ``validators.Validator`` object
         """
+        validators = validators or []
         self.required = required
         self.default = default
-        self.validators = validators
 
         if self.required:
-            self.validators.insert(0, field_validators.RequiredValidator())
+            validators.insert(0, field_validators.RequiredValidator())
+        self.validators = validators
+
 
         # This is set after a successful validation by the ``validate`` method
         self._value = None
@@ -85,7 +87,7 @@ class Field:
 
 class CharField(Field):
     """ Field defining validation used commonly for character fields """
-    def __init__(self, max_length=None, validators=[], *args, **kwargs):
+    def __init__(self, max_length=None, validators=None, *args, **kwargs):
         """ Creates an instance of a CharacterField and adds a max-length
             validator to it if the ``max_length`` attribute is specified and
             also adds a ``validators.TypeValidator(field_type=str)`` validator
@@ -94,18 +96,19 @@ class CharField(Field):
             ``validators.MaxLengthValidator(length=max_length)`` validator to
             the field
         """
+        validators = validators or []
         validators.append(field_validators.TypeValidator(field_type=str))
         self.max_length = max_length
         if self.max_length:
             validators.append(
                 field_validators.MaxLengthValidator(length=self.max_length))
 
-        return super().__init__(*args, validators=validators, **kwargs)
+        super().__init__(*args, validators=validators, **kwargs)
 
 
 class IntegerField(Field):
     """ Field defining validation used commonly for character fields """
-    def __init__(self, validators=[], *args, **kwargs):
+    def __init__(self, validators=None, *args, **kwargs):
         """ Creates an instance of a CharacterField and adds a max-length
             validator to it if the ``max_length`` attribute is specified and
             also adds a ``validators.TypeValidator(field_type=str)`` validator
@@ -114,6 +117,7 @@ class IntegerField(Field):
             ``validators.MaxLengthValidator(length=max_length)`` validator to
             the field
         """
+        validators = validators or []
         validators.append(field_validators.TypeValidator(field_type=int))
 
         return super().__init__(*args, validators=validators, **kwargs)

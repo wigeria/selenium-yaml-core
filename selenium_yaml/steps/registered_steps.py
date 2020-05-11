@@ -13,7 +13,8 @@ REGISTERED_STEPS = {
     "wait": core_steps.WaitStep,
     "wait_for_element": core_steps.WaitForElementStep,
     "click": core_steps.ClickElementStep,
-    "type": core_steps.TypeTextStep
+    "type": core_steps.TypeTextStep,
+    "select": core_steps.SelectOptionStep
 }
 
 

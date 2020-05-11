@@ -5,11 +5,13 @@ All of the steps contained here are derived from the BaseStep class and build
 their own ``perform`` and ``validate`` methods
 """
 from selenium_yaml import exceptions
-from selenium_yaml.steps import BaseStep
 from selenium_yaml import fields
+from selenium_yaml.steps import BaseStep
+import selenium_yaml.driver_utils as utils
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select
 import selenium.common.exceptions as sel_exceptions
 import time
 
@@ -93,13 +95,7 @@ class ClickElementStep(BaseStep):
         """ Clicks on the given ``element`` """
         driver = self.engine.driver
         data = self.validated_data
-        try:
-            el = driver.find_element_by_xpath(data["element"])
-        except sel_exceptions.NoSuchElementException:
-            raise exceptions.StepPerformanceError(
-                "Could not find the element identified by " +
-                f"`{data['element']}`."
-            )
+        el = utils.wait_for_element(driver, data["element"])
         el.click()
 
     class Meta:
@@ -120,14 +116,35 @@ class TypeTextStep(BaseStep):
         """ Clicks on the given ``element`` """
         driver = self.engine.driver
         data = self.validated_data
-        try:
-            el = driver.find_element_by_xpath(data["element"])
-        except sel_exceptions.NoSuchElementException:
-            raise exceptions.StepPerformanceError(
-                "Could not find the element identified by " +
-                f"`{data['element']}`."
-            )
+        el = utils.wait_for_element(driver, data["element"])
         el.send_keys(data["text"])
 
     class Meta:
         fields = ["element", "text"]
+
+
+class SelectOptionStep(BaseStep):
+    """ Step that selects the given ``option`` in the given ``select`` element
+
+        The input must contain the following members:
+             - ``element`` : XPATH Selector for the select element
+             - ``option`` : The option that should be selected
+    """
+    option = fields.CharField(required=True)
+    element = fields.CharField(required=True)
+
+    def perform(self):
+        """ Selects the given ``option`` in the given ``element`` """
+        driver = self.engine.driver
+        data = self.validated_data
+        el = utils.wait_for_element(driver, data["element"])
+        select_el = Select(el)
+        try:
+            select_el.select_by_value(data["option"])
+        except sel_exceptions.NoSuchElementException:
+            raise exceptions.StepPerformanceError(
+                f"The option `{data['option']}` could not be found."
+            )
+
+    class Meta:
+        fields = ["element", "option"]
