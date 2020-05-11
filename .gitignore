@@ -127,3 +127,10 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Yaml files for testing
+*.test.yaml
+
+# Debug screenshots
+screenshots/
+*.png
