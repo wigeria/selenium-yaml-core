@@ -6,6 +6,8 @@ Basic Usage:
 """
 import argparse
 from selenium_yaml import SeleniumYAML
+from loguru import logger
+import os
 
 
 def setup_parser():
@@ -20,11 +22,19 @@ def setup_parser():
     parser.add_argument('--no-screenshots', dest='save_screenshots',
                         action='store_false')
     parser.set_defaults(save_screenshots=True)
+
+    parser.add_argument('--logs', dest='save_logs',
+                        action='store_true')
+    parser.add_argument('--no-logs', dest='save_logs',
+                        action='store_false')
+    parser.set_defaults(save_logs=True)
     return parser
 
 
-def main(yaml_file, save_screenshots=False):
+def main(yaml_file, save_screenshots=False, save_logs=False):
     """ Runs the SeleniumYAML bot over the given ``yaml_file`` """
+    if save_logs:
+        logger.add(os.path.join("logs", "sally_{time}.log"))
     engine = SeleniumYAML(yaml_file=yaml_file,
                           save_screenshots=save_screenshots)
     engine.perform()
@@ -33,6 +43,8 @@ def main(yaml_file, save_screenshots=False):
 if __name__ == "__main__":
     parser = setup_parser()
     args = parser.parse_args()
-    main(args.yaml_file, save_screenshots=args.save_screenshots)
+    main(args.yaml_file,
+         save_screenshots=args.save_screenshots,
+         save_logs=args.save_logs)
 
 
