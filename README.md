@@ -8,3 +8,14 @@ As long as the dependencies are installed, and you're using Python>=3.6, the CLI
 ```python -m scripts.run_sally```
 
 <sub><sup>Use the `--help` argument for details on the CLI!</sup></sub>
+
+
+## Todos
+
+- [ ] Screenshots should be saved in a folder named for the bot. A bot should have a bot name
+- [ ] Fields should be blurrable in screenshots; sensitivity array somehow?
+- [ ] YAML Cheat Sheet
+- [ ] Borders in screenshots around fields being worked on (if any)
+- [ ] Repeat Action for repeating steps until a condition is reached
+- [ ] Suffix step names with a number if they appear multiple times instead of showing an error
+- [ ] Add validation for titles not to have slashes in name since they cause directory saving issues

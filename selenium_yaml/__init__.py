@@ -47,6 +47,8 @@ class SeleniumYAML:
             ``save_screenshots``, if specified, is used to take screenshots of
             each step after it's executed or if it runs into an exception
         """
+        # TODO: Improve cases if the path to the file doesn't exist since at the
+        # moment it just returns ""
         self._steps = None
         assert yaml_file, "YAML not provided"
         if isinstance(yaml_file, str) and os.path.exists(yaml_file):
