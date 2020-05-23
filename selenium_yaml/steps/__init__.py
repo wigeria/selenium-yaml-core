@@ -7,6 +7,7 @@ Basic Example:
 """
 from selenium_yaml import exceptions
 from selenium_yaml import fields as step_fields
+from selenium_yaml.steps import resolvers
 from loguru import logger
 import os
 
@@ -79,7 +80,14 @@ class BaseStep:
                 self._validated_data[field] = field_instance.validate(
                     self.step_data.get(field, field_default))
             except exceptions.ValidationError as exc:
-                self._errors[field] = field_instance.errors
+                # Passing the error if the validation field seems like it
+                # is something that will use the `performance_data` resolvers
+                if resolvers.find_placeholders(
+                        self.step_data.get(field, field_default)):
+                    self._validated_data[field] = self.step_data.get(
+                        field, field_default)
+                else:
+                    self._errors[field] = field_instance.errors
 
         if self._errors:
             self._validated_data = None
@@ -109,8 +117,10 @@ class BaseStep:
             and saving it to the given ``dir_path`` directory
         """
         assert self.engine.driver, "Driver is not initialized."
+        dir_path = os.path.join(dir_path, self.engine.title)
         if not os.path.exists(dir_path):
-            os.mkdir(dir_path)
+            os.makedirs(dir_path)
+
         fname = os.path.join(dir_path, f"{self.title}.png")
         with open(fname, 'wb') as outf:
             el = self.engine.driver.find_element_by_tag_name('body')
@@ -122,8 +132,9 @@ class BaseStep:
             through the ``step_title`` attribute
         """
         logger.debug("Performing step {title}.", title=self.title)
+
         try:
-            self.perform()
+            step_data = self.perform() or {}
         except exceptions.StepPerformanceError:
             if save_screenshot:
                 logger.debug(f"Screenshot saved at {self.save_screenshot()}")
@@ -134,7 +145,13 @@ class BaseStep:
                 error_msg += \
                     f" Screenshot saved at {self.save_screenshot()}"
             raise exceptions.StepPerformanceError(error_msg)
+
+        if not isinstance(step_data, dict):
+            step_data = {}
+        self.engine.performance_data[self.internal_title] = step_data
+
         logger.debug("Successfully performed step {title}.", title=self.title)
+        logger.debug(f"Added step data {self.internal_title}: {step_data}.")
         if save_screenshot:
             logger.debug(f"Screenshot saved at {self.save_screenshot()}")
 
@@ -142,9 +159,13 @@ class BaseStep:
         """ Performs the step's action with the validated data
 
             Any returned data is logged by the SeleniumYAML engine for
-            debugging
+            debugging and stored in the engine's ``performance_data``
+            dict attribute under the step's ``internal_title`` key for
+            later usage
 
             Must be overridden in derived steps
+
+            Make sure this method returns either None or a Dict
         """
         raise NotImplementedError("The ``perform`` method must be overridden "
                                   "by the derived Step classes.")
@@ -169,3 +190,22 @@ class BaseStep:
             "``is_valid`` must be called prior to accessing the errors"
         )
         return self._errors
+
+    @property
+    def internal_title(self):
+        """ Returns the title in a format usable as an engine variable that can
+            be resolved through `resolvers.resolve_variable`
+            Just replaces all double underscores with `\\_`
+        """
+        return self.title.replace("__", "\\_")
+
+    @property
+    def performance_data(self):
+        """ Uses the validated data and formats all fields with the engine's
+            performance data to fill any placeholders
+        """
+        data = {}
+        for key, value in self.validated_data.items():
+            data[key] = resolvers.substitute_placeholders(
+                value, self.engine.performance_data)
+        return data

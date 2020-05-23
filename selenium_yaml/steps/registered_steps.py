@@ -14,7 +14,9 @@ REGISTERED_STEPS = {
     "wait_for_element": core_steps.WaitForElementStep,
     "click": core_steps.ClickElementStep,
     "type": core_steps.TypeTextStep,
-    "select": core_steps.SelectOptionStep
+    "select": core_steps.SelectOptionStep,
+    "make_request": core_steps.CallAPIStep,
+    "run_bot": core_steps.RunBotStep
 }
 
 

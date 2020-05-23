@@ -29,10 +29,20 @@ class YAMLParser:
             included steps
         """
         self.yaml_data = yaml.load(yaml_file)
-        assert isinstance(self.yaml_data, list), (
-            "Invalid YAML Schema. The data must be in a list syntax."
+
+        assert isinstance(self.yaml_data, dict), (
+            "Invalid YAML Schema. The data must be in a format of "
+            "{title, steps: [...]}"
+        ) 
+        assert "title" in self.yaml_data, (
+            "The YAML doesn't have a ``title`` key for the bot."
         )
+        assert "steps" in self.yaml_data and \
+            isinstance(self.yaml_data["steps"], list), (
+                "The ``steps`` in the YAML are not in a list format."
+            )
         self.engine = engine
+        self.bot_title = self.yaml_data["title"]
 
     def validate(self):
         """ Validates the ``yaml_data`` attribute and initializes the steps
@@ -42,7 +52,7 @@ class YAMLParser:
         """
         self._validated_steps = OrderedDict()
         self._errors = {}
-        for step in self.yaml_data:
+        for step in self.yaml_data["steps"]:
             # Validates that the step has a unique title first of all so
             # that errors can be assigned to the correct step title
             step_title = step.pop("title", None)

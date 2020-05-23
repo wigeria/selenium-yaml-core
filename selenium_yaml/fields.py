@@ -65,6 +65,7 @@ class Field:
             self._errors = errors
             raise exceptions.ValidationError(self._errors)
         self._value = value
+        self._errors = []
 
         return value
 
@@ -87,7 +88,8 @@ class Field:
 
 class CharField(Field):
     """ Field defining validation used commonly for character fields """
-    def __init__(self, max_length=None, validators=None, *args, **kwargs):
+    def __init__(self, max_length=None, validators=None, options=None,
+                 *args, **kwargs):
         """ Creates an instance of a CharacterField and adds a max-length
             validator to it if the ``max_length`` attribute is specified and
             also adds a ``validators.TypeValidator(field_type=str)`` validator
@@ -98,26 +100,53 @@ class CharField(Field):
         """
         validators = validators or []
         validators.append(field_validators.TypeValidator(field_type=str))
+
         self.max_length = max_length
         if self.max_length:
             validators.append(
                 field_validators.MaxLengthValidator(length=self.max_length))
 
+        self.options = options
+        if self.options:
+            validators.append(
+                field_validators.OptionsValidator(options=self.options))
+
         super().__init__(*args, validators=validators, **kwargs)
 
 
 class IntegerField(Field):
-    """ Field defining validation used commonly for character fields """
+    """ Field defining validation used commonly for integer fields """
     def __init__(self, validators=None, *args, **kwargs):
-        """ Creates an instance of a CharacterField and adds a max-length
-            validator to it if the ``max_length`` attribute is specified and
-            also adds a ``validators.TypeValidator(field_type=str)`` validator
-
-            ``max_length``, if specified, adds a
-            ``validators.MaxLengthValidator(length=max_length)`` validator to
-            the field
+        """ Creates an instance of a IntegerField and adds a
+            ``validators.TypeValidator(field_type=int)`` validator
         """
         validators = validators or []
         validators.append(field_validators.TypeValidator(field_type=int))
+
+        return super().__init__(*args, validators=validators, **kwargs)
+
+
+class DictField(Field):
+    """ Field defining validation used commonly for dictionary fields """
+    def __init__(self, validators=None, *args, **kwargs):
+        """ Creates an instance of a DictField and adds a
+            ``validators.TypeValidator(field_type=dict)`` validator
+        """
+        validators = validators or []
+        validators.append(field_validators.TypeValidator(field_type=dict))
+
+        return super().__init__(*args, validators=validators, **kwargs)
+
+
+class FilePathField(Field):
+    """ Field that adds a ``validators.FilePathValidator`` which confirms that
+        the given value is a valid file path
+    """
+    def __init__(self, validators=None, *args, **kwargs):
+        """ Creates an instance of a FilePathField and adds a
+            ``validators.FilePathValidator`` validator
+        """
+        validators = validators or []
+        validators.append(field_validators.FilePathValidator())
 
         return super().__init__(*args, validators=validators, **kwargs)

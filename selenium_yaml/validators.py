@@ -8,6 +8,7 @@ Basic Example:
     # TODO
 """
 from selenium_yaml import exceptions
+import os
 
 
 class Validator:
@@ -97,7 +98,7 @@ class TypeValidator(Validator):
         the given ``field_type``
     """
     def __init__(self, field_type=str, *args, **kwargs):
-        """ Adds a field_type attribute to the validator prior to init """
+        """ Adds a ``field_type`` attribute to the validator prior to init """
         self.field_type = field_type
         super().__init__(*args, **kwargs)
 
@@ -105,4 +106,31 @@ class TypeValidator(Validator):
         """ Validates that the value is an instance of ``self.field_type`` """
         if not isinstance(value, self.field_type):
             raise exceptions.ValidationError(
-                f"Value is not an instance of {self.field_type.__name__}")
+                f"Value is not an instance of {self.field_type.__name__}.")
+
+
+class OptionsValidator(Validator):
+    """ Validator which checks to make sure that the given ``value`` is a
+        part of the given ``options`` array
+    """
+    def __init__(self, options=None, *args, **kwargs):
+        """ Adds a ``options`` attribute to the validator prior to init """
+        self.options = options or []
+        super().__init__(*args, **kwargs)
+
+    def validate(self, value):
+        """ Validates that the value is in the ``options`` array """
+        if value not in self.options:
+            raise exceptions.ValidationError(
+                f"Value is not one of {self.options}.")
+
+
+class FilePathValidator(Validator):
+    """ Validator which checks to make sure that the given value is a valid
+        file path
+    """
+    def validate(self, value):
+        """ Validates that the value is an existing file path """
+        if not os.path.exists(value):
+            raise exceptions.ValidationError(
+                f"The `{value}` file path does not exist.")
