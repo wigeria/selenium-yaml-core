@@ -8,6 +8,7 @@ Basic Example:
     # TODO
 """
 from selenium_yaml import exceptions
+from selenium_yaml import steps
 import os
 
 
@@ -62,6 +63,57 @@ class Validator:
             "The ``is_valid`` must be called before accessing the error"
         )
         return self._error
+
+
+class StepValidator:
+    """ Validator for step fields - checks to make sure that the step data can
+        be resolved into a valid registered step
+
+        This validator doesn't need to derive from the base validator, as it's
+        used in a very different manner
+    """
+    def __init__(self, parent_step=None):
+        """ Creates an instance of StepValidator and adds the parent-step
+            as an attribute
+        """
+        self.parent_step = parent_step
+
+    def validate(self, step):
+        """ Receives the step-data as input and validates through the
+            ``action`` key in the given dictionary
+
+            Returns a validated instance of the step
+        """
+        errors = {}
+        # Title/Action validation must be done prior to the actual step
+        # validation
+        if "title" not in step:
+            step_title = "<unknown>"
+            raise exceptions.ValidationError({
+                step_title: "``title`` attribute is not provided on step."
+            })
+        step_title = step.pop("title")
+        errors[step_title] = []
+        if "action" not in step:
+            errors[step_title].append(
+                "``action`` is attribute not provided on step.")
+            raise exceptions.ValidationError(errors)
+        action = step.pop("action")
+
+        try:
+            step_cls = steps.registered_steps.get_registered_step(action)
+        except KeyError:
+            raise exceptions.ValidationError(
+                f"{step_title}'s ``step_cls`` "
+                "not found."
+            )
+        step_cls = step_cls(
+            self.parent_step.engine, step_data=step, title=step_title)
+        if not step_cls.is_valid():
+            errors[step_title] = step_cls.errors
+            raise exceptions.ValidationError(errors)
+
+        return step_cls
 
 
 class RequiredValidator(Validator):
@@ -134,3 +186,27 @@ class FilePathValidator(Validator):
         if not os.path.exists(value):
             raise exceptions.ValidationError(
                 f"The `{value}` file path does not exist.")
+
+
+class ResolvedVariableValidator(Validator):
+    """ Validator which checks to make sure that the given value is either
+        a performance variable that can be resolved (in the format of
+        ``${VARIABLE}``) or is already of the required type
+    """
+    def __init__(self, required_type=None, *args, **kwargs):
+        """ Adds a ``required_type`` attribute to the validator prior to
+            init
+        """
+        self.required_type = required_type
+        super().__init__(*args, **kwargs)
+
+    def validate(self, value):
+        """ Validates that the value is either a resolved variable or of the
+            given ``required_type``
+        """
+        placeholders = steps.resolvers.find_placeholders(value)
+        if (placeholders is None or len(placeholders) != 1) and not \
+                isinstance(value, self.required_type):
+            raise exceptions.ValidationError(
+                f"The `{value}` is not a resolved variable, and is not of the "
+                "required type either.")

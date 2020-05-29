@@ -75,7 +75,6 @@ class YAMLParser:
             step_cls = step_cls(self.engine, step_data=step, title=step_title)
             if not step_cls.is_valid():
                 self._errors[step_title] = step_cls.errors
-                self._validated_steps = OrderedDict()
             else:
                 self._validated_steps[step_title] = step_cls
 

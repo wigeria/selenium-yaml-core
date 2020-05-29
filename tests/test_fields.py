@@ -11,7 +11,7 @@ class FieldTestMixin:
     """ Contains common methods for testing field validation successs or
         failure
     """
-    def is_successful_validation(self, field, value):
+    def is_successful_validation(self, field, value, step=None):
         """ Uses basic assertions to test that the validation was a success
 
             Parameters
@@ -21,12 +21,12 @@ class FieldTestMixin:
 
             value : The value that should be passed on to the field
         """
-        assert field.validate(value) == value
+        assert field.validate(value, step) == value
         assert isinstance(field.errors, list)
         assert len(field.errors) == 0
         assert field.value == value
 
-    def is_unsuccessful_validation(self, field, value):
+    def is_unsuccessful_validation(self, field, value, step=None):
         """ Uses basic assertions to test that the validation was a failure
 
             Parameters
@@ -37,7 +37,7 @@ class FieldTestMixin:
             value : The value that should be passed on to the field
         """
         with pytest.raises(exceptions.ValidationError) as _:
-            field.validate(value)
+            field.validate(value, step)
         assert isinstance(field.errors, list)
         assert len(field.errors) > 0
 

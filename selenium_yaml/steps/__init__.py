@@ -78,7 +78,9 @@ class BaseStep:
 
             try:
                 self._validated_data[field] = field_instance.validate(
-                    self.step_data.get(field, field_default))
+                    self.step_data.get(field, field_default),
+                    self
+                )
             except exceptions.ValidationError as exc:
                 # Passing the error if the validation field seems like it
                 # is something that will use the `performance_data` resolvers
@@ -127,14 +129,17 @@ class BaseStep:
             outf.write(el.screenshot_as_png)
         return fname
 
-    def run_step(self, save_screenshot=False):
+    def run_step(self, save_screenshot=False, extra_context=None):
         """ Performs the step using the ``perform`` method and logs any details
             through the ``step_title`` attribute
         """
         logger.debug("Performing step {title}.", title=self.title)
 
+        # Resolving performance data
+        performance_data = self.get_performance_data(extra_context)
+
         try:
-            step_data = self.perform() or {}
+            step_data = self.perform(performance_data) or {}
         except exceptions.StepPerformanceError:
             if save_screenshot:
                 logger.debug(f"Screenshot saved at {self.save_screenshot()}")
@@ -155,7 +160,7 @@ class BaseStep:
         if save_screenshot:
             logger.debug(f"Screenshot saved at {self.save_screenshot()}")
 
-    def perform(self):
+    def perform(self, performance_data):
         """ Performs the step's action with the validated data
 
             Any returned data is logged by the SeleniumYAML engine for
@@ -199,13 +204,15 @@ class BaseStep:
         """
         return self.title.replace("__", "\\_")
 
-    @property
-    def performance_data(self):
+    def get_performance_data(self, extra_context=None):
         """ Uses the validated data and formats all fields with the engine's
             performance data to fill any placeholders
         """
         data = {}
+        context = extra_context or {}
+        context.update(self.engine.performance_data)
+
         for key, value in self.validated_data.items():
             data[key] = resolvers.substitute_placeholders(
-                value, self.engine.performance_data)
+                value, context)
         return data

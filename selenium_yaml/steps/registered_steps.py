@@ -16,6 +16,7 @@ REGISTERED_STEPS = {
     "type": core_steps.TypeTextStep,
     "select": core_steps.SelectOptionStep,
     "make_request": core_steps.CallAPIStep,
+    "iterate_over": core_steps.IteratorStep,
     "run_bot": core_steps.RunBotStep
 }
 

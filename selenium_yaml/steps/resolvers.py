@@ -47,12 +47,18 @@ def substitute_placeholders(value, context):
     """
     if isinstance(value, str):
         placeholders = find_placeholders(value)
+        placeholder_count = len(placeholders)
         for placeholder in placeholders:
             # Only replaces the placeholder if the resolution is valid
             resolved_value = resolve_variable(context, placeholder)
             if resolved_value:
-                value = value.replace(
-                    "${" + placeholder + "}",
-                    str(resolve_variable(context, placeholder))
-                )
+                if placeholder_count == 1:
+                    # This is for cases where we need the placeholder to be
+                    # replaced as is; steps should handle their own conversions
+                    value = resolved_value
+                else:
+                    value = value.replace(
+                        "${" + placeholder + "}",
+                        str(resolved_value)
+                    )
     return value
