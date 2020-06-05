@@ -130,6 +130,18 @@ class IntegerField(Field):
         return super().__init__(*args, validators=validators, **kwargs)
 
 
+class BooleanField(Field):
+    """ Field defining validation used commonly for boolean fields """
+    def __init__(self, validators=None, *args, **kwargs):
+        """ Creates an instance of a BooleanField and adds a
+            ``validators.TypeValidator(field_type=bool)`` validator
+        """
+        validators = validators or []
+        validators.append(field_validators.TypeValidator(field_type=bool))
+
+        return super().__init__(*args, validators=validators, **kwargs)
+
+
 class DictField(Field):
     """ Field defining validation used commonly for dictionary fields """
     def __init__(self, validators=None, *args, **kwargs):

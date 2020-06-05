@@ -23,3 +23,21 @@ def wait_for_element(driver, xpath_sel, timeout=10):
             "Could not find the element identified by " +
             f"`{xpath_sel}` within `{timeout}` seconds."
         )
+
+
+def execute_xpath(driver, xpath_sel):
+    """ Returns the value of the given ``xpath_sel`` selector through a script
+        execution in the ``driver``
+    """
+    script = """
+        var nodes = document.evaluate("%s", document, null, XPathResult.ANY_TYPE, null); 
+        var currentNode = nodes.iterateNext();
+        var returnValues = [];
+        while (currentNode) {
+            returnValues.push(currentNode.nodeValue);
+            currentNode = nodes.iterateNext();
+        };
+        return returnValues;
+    """ % xpath_sel
+    nodes = driver.execute_script(script)
+    return nodes

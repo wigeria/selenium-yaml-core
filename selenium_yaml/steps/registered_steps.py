@@ -17,7 +17,10 @@ REGISTERED_STEPS = {
     "select": core_steps.SelectOptionStep,
     "make_request": core_steps.CallAPIStep,
     "iterate_over": core_steps.IteratorStep,
-    "run_bot": core_steps.RunBotStep
+    "run_bot": core_steps.RunBotStep,
+    "conditional": core_steps.ConditionalStep,
+    "store_xpath": core_steps.StoreXpathStep,
+    "store_page_url": core_steps.StorePageUrlStep
 }
 
 

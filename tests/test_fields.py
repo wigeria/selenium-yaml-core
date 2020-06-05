@@ -116,6 +116,26 @@ class TestIntegerField(FieldTestMixin):
         self.is_successful_validation(field, field.default)
 
 
+class TestBooleanField(FieldTestMixin):
+    """ Contains tests for the Boolean field for required, default and type """
+    def test_boolean_field_type(self):
+        """ Tests that the Boolean field fails with a non-boolean value """
+        field = fields.BooleanField()
+        self.is_unsuccessful_validation(field, "Test")
+
+    def test_required_boolean_field_without_default_on_null(self):
+        """ Tests that a required Boolean field fails without a default """
+        field = fields.BooleanField(required=True)
+        self.is_unsuccessful_validation(field, None)
+
+    def test_required_boolean_field_with_default_on_null(self):
+        """ Tests that a required boolean field succeeds with a valid bool
+            default on a null value
+        """
+        field = fields.BooleanField(required=True, default=True)
+        self.is_successful_validation(field, field.default)
+
+
 class TestDictField(FieldTestMixin):
     """ Contains tests for the dict field for required, default and type """
     def test_dict_field_type(self):

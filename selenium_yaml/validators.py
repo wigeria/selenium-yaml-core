@@ -196,6 +196,8 @@ class ResolvedVariableValidator(Validator):
     def __init__(self, required_type=None, *args, **kwargs):
         """ Adds a ``required_type`` attribute to the validator prior to
             init
+            If ``required_type`` is None, the value will be considered valid
+            if it is **not null**
         """
         self.required_type = required_type
         super().__init__(*args, **kwargs)
@@ -205,8 +207,15 @@ class ResolvedVariableValidator(Validator):
             given ``required_type``
         """
         placeholders = steps.resolvers.find_placeholders(value)
-        if (placeholders is None or len(placeholders) != 1) and not \
-                isinstance(value, self.required_type):
-            raise exceptions.ValidationError(
-                f"The `{value}` is not a resolved variable, and is not of the "
-                "required type either.")
+        no_placeholders = placeholders is None or len(placeholders) != 1
+
+        if self.required_type is not None:
+            if no_placeholders and not isinstance(value, self.required_type):
+                raise exceptions.ValidationError(
+                    f"The `{value}` is not a resolved variable, and is not of "
+                    "the required type either.")
+        else:
+            if no_placeholders and value is None:
+                raise exceptions.ValidationError(
+                    f"The `{value}` is not a resolved variable, and is not of "
+                    "the required type either.")

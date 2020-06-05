@@ -51,14 +51,15 @@ def substitute_placeholders(value, context):
         for placeholder in placeholders:
             # Only replaces the placeholder if the resolution is valid
             resolved_value = resolve_variable(context, placeholder)
+            placeholder_string = "${" + placeholder + "}"
             if resolved_value:
-                if placeholder_count == 1:
+                if placeholder_count == 1 and value == placeholder_string:
                     # This is for cases where we need the placeholder to be
                     # replaced as is; steps should handle their own conversions
                     value = resolved_value
                 else:
                     value = value.replace(
-                        "${" + placeholder + "}",
+                        placeholder_string,
                         str(resolved_value)
                     )
     return value

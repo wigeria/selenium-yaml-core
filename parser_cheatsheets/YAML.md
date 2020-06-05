@@ -122,4 +122,39 @@ Each step, at minimum, must have a `title` and an `action` key. The `title` will
       action: run_bot
       path: /path/to/bot's/yaml
   ```
+
+- **Store Page URL**
+
+  ```yaml
+  - title: Store the current page's URL in a <Step Title>__url variable for later use
+      action: store_page_url
+  ```
+
+- **Store Xpath Nodes**
+
+  ```yaml
+  - title: Store the result of a given xpath selector as a variable for later use (attributes/props only!)
+      action: store_xpath
+      selector: "//img[@id='img-id']/@src" <-- Note that this is an xpath selector to an attribute, not an element!
+      variable: Variable To Store Result In
+      select_first: True|False <-- If False, the result is stored as an array; if True, only the first result is stored
+  ```
+
+- **Conditional**
+
+  ```yaml
+  - title: Conditionally run a step
+      action: conditional
+      value: //span/text() <-- Value to be checked; this could be a resolved variable or an xpath selector
+      equals: The Value must equal this; could be a resolved variable or any other type
+      negate: True|False <-- If True, condition is set to `value != equals`, otherwise it's `value == equals`
+      steps:
+        - title: These Steps only run if the condition evaluates to True
+          action: navigate
+          url: https://google.com
+        - title: Add Query
+          action: type
+          element: //input[@name='q']
+          text: "Query"
+  ```
   

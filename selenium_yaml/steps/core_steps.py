@@ -7,6 +7,7 @@ their own ``perform`` and ``validate`` methods
 import selenium_yaml
 from selenium_yaml import exceptions
 from selenium_yaml import fields
+from selenium_yaml import validators
 from selenium_yaml.steps import BaseStep
 import selenium_yaml.driver_utils as utils
 import json
@@ -248,3 +249,122 @@ class IteratorStep(BaseStep):
 
     class Meta:
         fields = ["iterator", "steps"]
+
+
+class ConditionalStep(BaseStep):
+    """ Conditionally executes the ``steps`` if the xpath ``value`` or stored
+        variables matches the ``equals`` field
+        Note that the resolved xpath value is ALWAYS a list
+        ``negate`` is used to decide whether to use `==` as the operator
+        or `!=`
+    """
+    # The value field could be provided as an xpath selector or as a
+    # resolved variable
+    value = fields.ResolvedVariableField(required=True, required_type=str)
+    equals = fields.ResolvedVariableField(required=True)
+    negate = fields.BooleanField(required=True, default=False)
+    steps = fields.NestedStepsField()
+
+    def perform(self, performance_data):
+        """ Executes all of the nested steps if the given ``value``
+            (resolved/xpath) is equal to the given ``equals`` field
+        """
+        driver = self.engine.driver
+        value = performance_data["value"]
+        equals = performance_data["equals"]
+        steps = performance_data["steps"]
+
+        # Checking if value is a resolved variable - if not, it's resolved
+        # as xpath; we know that it isn't resolved if it's the same as the
+        # value in ``validated_data`` since the value is resolved through
+        # ``get_performance_data()`` in ``run_step()``
+        if value == self.validated_data["value"]:
+            value = utils.execute_xpath(driver, value)
+            # Converting the ``equals`` value to a list, since
+            # resolved xpath is always a list
+            if not isinstance(equals, list):
+                equals = [equals]
+
+        # Converting both ``value`` and ``equals`` to sets if they're arrays
+        if isinstance(value, list) and isinstance(equals, list):
+            value = set(value)
+            equals = set(equals)
+
+        if performance_data["negate"]:
+            condition = value != equals
+            operator = "!="
+        else:
+            condition = value == equals
+            operator = "=="
+
+        if condition:
+            logger.debug(f"{value} {operator} {equals}; executing sub-steps.")
+            for step_title, step in steps.items():
+                try:
+                    step.run_step(
+                        save_screenshot=self.engine.save_screenshots
+                    )
+                except exceptions.StepPerformanceError:
+                    logger.exception(
+                        "Ran into an exception while performing {step_title}",
+                        step_title=step_title
+                    )
+                    break
+            return {"success": True}
+        else:
+            logger.debug(f"{value} != {equals}; skipping sub-steps.")
+            return {"success": False}
+
+    class Meta:
+        fields = ["value", "equals", "steps", "negate"]
+
+
+class StoreXpathStep(BaseStep):
+    """ Step for storing the nodes returned by a given xpath ``selector``
+        into the engine's performance data in a given ``variable`` so that
+        it can later be accessed as ``Step Name__<variable>``
+
+        Note that the ``selector`` is not validated as Xpath at the moment,
+        so it should be used with care
+
+        If ``select_first`` is provided as True, only the first xpath return
+        value is stored - otherwise the full return value is stored as an array
+    """
+    selector = fields.CharField(required=True)
+    select_first = fields.BooleanField(required=True, default=False)
+    variable = fields.CharField(required=True)
+
+    def perform(self, performance_data):
+        """ Returns the xpath selector's value so that it gets stored in
+            the engine performance data
+        """
+        driver = self.engine.driver
+        selector = performance_data["selector"]
+        variable = performance_data["variable"]
+        select_first = performance_data["select_first"]
+
+        value = utils.execute_xpath(driver, selector)
+
+        if select_first:
+            value = value[0] if value else None
+
+        return {
+            variable: value
+        }
+
+    class Meta:
+        fields = ["selector", "select_first", "variable"]
+
+
+class StorePageUrlStep(BaseStep):
+    """ Step for storing the current page url into a ``Step Title__url``
+        variable so that it can be accessed later on
+    """
+    def perform(self, performance_data):
+        """ Returns the current driver URL for later access """
+        return {
+            "url": self.engine.driver.current_url
+        }
+
+    class Meta:
+        fields = []
