@@ -39,6 +39,7 @@ Each step, at minimum, must have a `title` and an `action` key. The `title` will
     - title: Wait for the element to be clickable
       action: wait_for_element
       element: <Xpath Selector for the Element>
+      seconds: 10
     ```
 
 - **Click**
