@@ -114,15 +114,18 @@ class TypeTextStep(BaseStep):
     """
     text = fields.CharField(required=True)
     element = fields.CharField(required=True)
+    clear = fields.BooleanField(required=True, default=False)
 
     def perform(self, performance_data):
         """ Clicks on the given ``element`` """
         driver = self.engine.driver
         el = utils.wait_for_element(driver, performance_data["element"])
+        if performance_data["clear"]:
+            el.clear()
         el.send_keys(performance_data["text"])
 
     class Meta:
-        fields = ["element", "text"]
+        fields = ["element", "text", "clear"]
 
 
 class SelectOptionStep(BaseStep):

@@ -56,6 +56,7 @@ Each step, at minimum, must have a `title` and an `action` key. The `title` will
       action: type
       element: <Xpath Selector for the Element>
       text: Text to type into the element
+      clear: True|False <-- If True, clears the element before typing anything
     ```
 
 - **Select**
