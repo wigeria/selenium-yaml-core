@@ -72,13 +72,7 @@ class StepValidator:
         This validator doesn't need to derive from the base validator, as it's
         used in a very different manner
     """
-    def __init__(self, parent_step=None):
-        """ Creates an instance of StepValidator and adds the parent-step
-            as an attribute
-        """
-        self.parent_step = parent_step
-
-    def validate(self, step):
+    def validate(self, step_data):
         """ Receives the step-data as input and validates through the
             ``action`` key in the given dictionary
 
@@ -87,18 +81,18 @@ class StepValidator:
         errors = {}
         # Title/Action validation must be done prior to the actual step
         # validation
-        if "title" not in step:
+        if "title" not in step_data:
             step_title = "<unknown>"
             raise exceptions.ValidationError({
                 step_title: "``title`` attribute is not provided on step."
             })
-        step_title = step.pop("title")
+        step_title = step_data.pop("title")
         errors[step_title] = []
-        if "action" not in step:
+        if "action" not in step_data:
             errors[step_title].append(
                 "``action`` is attribute not provided on step.")
             raise exceptions.ValidationError(errors)
-        action = step.pop("action")
+        action = step_data.pop("action")
 
         try:
             step_cls = steps.registered_steps.get_registered_step(action)
@@ -107,8 +101,11 @@ class StepValidator:
                 f"{step_title}'s ``step_cls`` "
                 "not found."
             )
+        # TODO: Since the sub-steps aren't initialized with a screenshots path,
+        # their screenshots CAN NOT BE SAVED at the moment!
         step_cls = step_cls(
-            self.parent_step.engine, step_data=step, title=step_title)
+            step_data=step_data,
+            title=step_title)
         if not step_cls.is_valid():
             errors[step_title] = step_cls.errors
             raise exceptions.ValidationError(errors)

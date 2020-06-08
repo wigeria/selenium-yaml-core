@@ -99,9 +99,9 @@ Each step, at minimum, must have a `title` and an `action` key. The `title` will
         - title: Add Query
           action: type
           element: //input[@name='q']
-          text: "`current_iterator` here refers to the current element in the loop: ${current_iterator}
+          text: "`current_iterator` here refers to the current element in the loop: ${current_iterator}"
     ```
-  - This can also be used with the Call API Step:
+  - This can also be used with the **Make Request** Step:
 
   ```yaml
     - title: Loop step

@@ -9,6 +9,7 @@ from selenium_yaml import exceptions
 from selenium_yaml.steps.registered_steps import get_registered_step
 from collections import OrderedDict
 import yaml
+import os
 
 
 DUPLICATE_ERROR = "Step titles must be unique"
@@ -24,7 +25,7 @@ class YAMLParser:
 
         # TODO: Refactor off of a base Parser class
     """
-    def __init__(self, yaml_file, engine):
+    def __init__(self, yaml_file):
         """ Parses the given ``yaml_file`` and validates and initializes the
             included steps
         """
@@ -41,8 +42,10 @@ class YAMLParser:
             isinstance(self.yaml_data["steps"], list), (
                 "The ``steps`` in the YAML are not in a list format."
             )
-        self.engine = engine
         self.bot_title = self.yaml_data["title"]
+        self.screenshots_path = os.path.join(
+            os.getcwd(), "screenshots", self.bot_title
+        )
 
     def validate(self):
         """ Validates the ``yaml_data`` attribute and initializes the steps
@@ -59,7 +62,7 @@ class YAMLParser:
             if not step_title:
                 self._errors = {"<unknown>": MISSING_TITLE_ERROR}
                 self._validated_steps = OrderedDict()
-                raise exceptions.ValueError(MISSING_TITLE_ERROR)
+                raise ValueError(MISSING_TITLE_ERROR)
             elif step_title in self._validated_steps:
                 self._errors[step_title] = [DUPLICATE_ERROR]
             elif step_title in self._errors:
@@ -72,7 +75,8 @@ class YAMLParser:
                     f"not found."
                 continue
             # Then validates that the step has a valid set of data
-            step_cls = step_cls(self.engine, step_data=step, title=step_title)
+            step_cls = step_cls(step_data=step, title=step_title,
+                                screenshots_path=self.screenshots_path)
             if not step_cls.is_valid():
                 self._errors[step_title] = step_cls.errors
             else:

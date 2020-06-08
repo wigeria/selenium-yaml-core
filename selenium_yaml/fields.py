@@ -48,13 +48,9 @@ class Field:
         self._value = None
         self._errors = None
 
-    def validate(self, value, step):
+    def validate(self, value):
         """ Validates the given ``value`` based on the active attributes on the
             class
-
-            ``step`` can be used for adding customized errors if needed
-            or for manipulating the value in certain cases (such as nested
-            step fields)
         """
         errors = []
         for validator in self.validators:
@@ -190,7 +186,7 @@ class ResolvedVariableField(Field):
 class NestedStepsField(Field):
     """ Field that resolves the given data as registered steps """
 
-    def validate(self, value, step):
+    def validate(self, value):
         """ Validates each step individually through
             validators.StepValidator
 
@@ -201,12 +197,9 @@ class NestedStepsField(Field):
             value = [value]
         validated_steps = {}
         for sub_step in value:
-            # Namespacing the sub-step by the parent_title.sub-step-title
-            if "title" in sub_step:
-                sub_step["title"] = f"{step.title}.{sub_step['title']}"
-            validator = field_validators.StepValidator(parent_step=step)
+            validator = field_validators.StepValidator()
             # This will raise a ValidationError if there's an error anywhere
             step_cls = validator.validate(sub_step)
             validated_steps[step_cls.title] = step_cls
-        return super().validate(validated_steps, step=step)
+        return super().validate(validated_steps)
 

@@ -33,34 +33,33 @@ class BaseStep:
         attribute containing an iterable of attribute names on the step
         which will point to the fields that need to be validated
     """
-    def __init__(self, engine, step_data=None, title=None):
+    def __init__(self, step_data=None, title=None, screenshots_path=None):
         """ Creates a new instance of the step and sets attributes that will
             be modified during validation so that the step can be performed
 
             Parameters
             ----------
 
-            ``engine`` : The selenium_yaml.SeleniumYAML instance that's
-                going to be performing this step; this instance will also have
-                the webdriver attribute in ``engine.driver`` if all steps get
-                validated successfully
-
             ``step_data`` : The data that will be passed forwards to the
                 ``perform`` method after validation
 
             ``title`` : A unique identifier for this step that is used
                 for logging
+
+            ``screenshots_path`` : Path to the directory where the screenshots
+                for this step should be saved (only required if enabled in
+                ``run_step``)
         """
-        self.engine = engine
         self.step_data = step_data
         self.title = title
+        self.screenshots_path = screenshots_path
         # This should get set to the validated in ``is_valid`` if it's
         # validated successfully
         self._validated_data = None
         self._errors = None
 
     def validate(self):
-        """ Validates the step's ``step_data`` prior to ``perform``
+        """ Validates the step's ``step_data`` prior to ``run_step``
 
             Should return the True/False and set the ``_errors`` and
             ``_validated_data`` attributes
@@ -78,8 +77,7 @@ class BaseStep:
 
             try:
                 self._validated_data[field] = field_instance.validate(
-                    self.step_data.get(field, field_default),
-                    self
+                    self.step_data.get(field, field_default)
                 )
             except exceptions.ValidationError as exc:
                 # Passing the error if the validation field seems like it
@@ -104,67 +102,78 @@ class BaseStep:
             "There is no data to validate. The ``step_data`` parameter must "
             "be passed into the step for it to get validated."
         )
-        is_valid = self.validate()
 
-        if is_valid:
+        if self.validate():
             return True
         else:
             if raise_exception:
                 raise exceptions.ValidationError(self.errors)
             return False
 
-    def save_screenshot(self,
-                        dir_path=os.path.join(os.getcwd(), "screenshots")):
+    def save_screenshot(self, driver):
         """ Debug method for taking a full-screen screenshot of the driver
-            and saving it to the given ``dir_path`` directory
+            and saving it to the ``screenshots_path`` directory
         """
-        assert self.engine.driver, "Driver is not initialized."
-        dir_path = os.path.join(dir_path, self.engine.title)
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
+        if not os.path.exists(self.screenshots_path):
+            os.makedirs(self.screenshots_path)
 
-        fname = os.path.join(dir_path, f"{self.title}.png")
+        fname = os.path.join(self.screenshots_path, f"{self.title}.png")
         with open(fname, 'wb') as outf:
-            el = self.engine.driver.find_element_by_tag_name('body')
+            el = driver.find_element_by_tag_name('body')
             outf.write(el.screenshot_as_png)
         return fname
 
-    def run_step(self, save_screenshot=False, extra_context=None):
+    def run_step(self, driver, performance_context, save_screenshots=False):
         """ Performs the step using the ``perform`` method and logs any details
             through the ``step_title`` attribute
+
+            Parameters
+            ----------
+
+            ``driver`` : Driver that the step will be executed on
+
+            ``performance_context`` : Context for the step that will be used for
+                resolving context variables in the step-fields
+                (see ``resolve_step_data()``)
+
+            ``save_screenshots`` : Boolean for whether screenshots should be
+                saved for this step or not
         """
         logger.debug("Performing step {title}.", title=self.title)
 
         # Resolving performance data
-        performance_data = self.get_performance_data(extra_context)
+        performance_data = self.resolve_step_data(performance_context)
 
         try:
-            step_data = self.perform(performance_data) or {}
+            step_data = self.perform(
+                driver, performance_data, performance_context) or {}
         except exceptions.StepPerformanceError:
-            if save_screenshot:
-                logger.debug(f"Screenshot saved at {self.save_screenshot()}")
+            if save_screenshots:
+                logger.debug(f"Screenshot saved at {self.save_screenshot(driver)}")
             raise
         except:
             error_msg = f"Uncaught error while performing {self.title}."
-            if save_screenshot:
+            if save_screenshots:
                 error_msg += \
-                    f" Screenshot saved at {self.save_screenshot()}"
+                    f" Screenshot saved at {self.save_screenshot(driver)}"
             raise exceptions.StepPerformanceError(error_msg)
 
         if not isinstance(step_data, dict):
             step_data = {}
-        self.engine.performance_data[self.internal_title] = step_data
 
         logger.debug("Successfully performed step {title}.", title=self.title)
         logger.debug(f"Added step data {self.internal_title}: {step_data}.")
-        if save_screenshot:
-            logger.debug(f"Screenshot saved at {self.save_screenshot()}")
+        if save_screenshots:
+            logger.debug(f"Screenshot saved at {self.save_screenshot(driver)}")
 
-    def perform(self, performance_data):
-        """ Performs the step's action with the validated data
+        return step_data
+
+    def perform(self, driver, performance_data, performance_context):
+        """ Performs the step's action with the validated data on the given
+            driver
 
             Any returned data is logged by the SeleniumYAML engine for
-            debugging and stored in the engine's ``performance_data``
+            debugging and stored in the engine's ``performance_context``
             dict attribute under the step's ``internal_title`` key for
             later usage
 
@@ -204,15 +213,13 @@ class BaseStep:
         """
         return self.title.replace("__", "\\_")
 
-    def get_performance_data(self, extra_context=None):
+    def resolve_step_data(self, performance_context):
         """ Uses the validated data and formats all fields with the engine's
-            performance data to fill any placeholders
+            performance context to fill any placeholders
         """
         data = {}
-        context = extra_context or {}
-        context.update(self.engine.performance_data)
 
         for key, value in self.validated_data.items():
             data[key] = resolvers.substitute_placeholders(
-                value, context)
+                value, performance_context)
         return data

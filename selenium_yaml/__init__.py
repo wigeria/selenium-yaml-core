@@ -24,7 +24,7 @@ class SeleniumYAML:
         item in the `steps` array into an individual "Step"
     """
     @logger.catch(reraise=True)
-    def __init__(self, yaml_file=None, driver_class=webdriver.Chrome,
+    def __init__(self, yaml_file=None,  driver_class=webdriver.Chrome,
                  driver_options=None, driver_executable_path='chromedriver',
                  save_screenshots=False, parse_template=False,
                  template_context=None, driver=None):
@@ -75,15 +75,15 @@ class SeleniumYAML:
             template = Template(yaml_file)
             yaml_file = template.render(template_context)
 
-        self.save_screenshots = save_screenshots
-        self.performance_data = {}
-
-        parser = YAMLParser(yaml_file, self)
+        parser = YAMLParser(yaml_file)
         if parser.is_valid():
             self.steps = parser.validated_steps
             self.title = parser.bot_title
         else:
             raise exceptions.ValidationError(parser.errors)
+
+        self.save_screenshots = save_screenshots
+        self.performance_context = {}
 
         if isinstance(driver, webdriver.remote.webdriver.WebDriver):
             self.driver = driver
@@ -124,13 +124,17 @@ class SeleniumYAML:
         assert self.driver, "Driver must be initialized prior to performance."
         for step_title, step in self.steps.items():
             try:
-                step.run_step(save_screenshot=self.save_screenshots)
+                step_data = step.run_step(
+                    self.driver,
+                    self.performance_context,
+                    save_screenshots=self.save_screenshots)
             except exceptions.StepPerformanceError:
                 logger.exception(
                     "Ran into an exception while performing {step_title}",
                     step_title=step_title
                 )
                 break
+            self.performance_context[step_title] = step_data
         logger.debug("Step performance sequence finished.")
         if quit:
             self.__quit_driver()

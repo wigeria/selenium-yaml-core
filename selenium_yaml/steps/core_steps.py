@@ -30,9 +30,8 @@ class NavigateStep(BaseStep):
     """
     url = fields.CharField(required=True)
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Navigates the engine to the provided ``url`` """
-        driver = self.engine.driver
         driver.get(performance_data["url"])
 
     class Meta:
@@ -47,7 +46,7 @@ class WaitStep(BaseStep):
     """
     seconds = fields.IntegerField(required=True)
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Adds an explicit wait for the given ``seconds`` """
         time.sleep(performance_data["seconds"])
 
@@ -66,14 +65,12 @@ class WaitForElementStep(BaseStep):
     seconds = fields.IntegerField(required=True)
     element = fields.CharField(required=True)
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Adds an explicit wait for the given ``seconds`` until the given
             ``element`` is visible
         """
-        driver = self.engine.driver
-
         try:
-            WebDriverWait(driver, data["seconds"]).until(
+            WebDriverWait(driver, performance_data["seconds"]).until(
                 EC.presence_of_element_located(
                     (By.XPATH, performance_data["element"])
                 )
@@ -95,9 +92,8 @@ class ClickElementStep(BaseStep):
     """
     element = fields.CharField(required=True)
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Clicks on the given ``element`` """
-        driver = self.engine.driver
         el = utils.wait_for_element(driver, performance_data["element"])
         el.click()
 
@@ -116,9 +112,8 @@ class TypeTextStep(BaseStep):
     element = fields.CharField(required=True)
     clear = fields.BooleanField(required=True, default=False)
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Clicks on the given ``element`` """
-        driver = self.engine.driver
         el = utils.wait_for_element(driver, performance_data["element"])
         if performance_data["clear"]:
             el.clear()
@@ -138,9 +133,8 @@ class SelectOptionStep(BaseStep):
     option = fields.CharField(required=True)
     element = fields.CharField(required=True)
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Selects the given ``option`` in the given ``element`` """
-        driver = self.engine.driver
         el = utils.wait_for_element(driver, performance_data["element"])
         select_el = Select(el)
         try:
@@ -159,20 +153,26 @@ class RunBotStep(BaseStep):
         bot with the same data given to the current bot
     """
     path = fields.FilePathField(required=True)
+    save_screenshots = fields.BooleanField(required=True, default=False)
+    parse_template = fields.BooleanField(required=True, default=False)
+    template_context = fields.ResolvedVariableField(
+        required=False, required_type=dict)
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Runs the Bot through the ``path`` YAML File """
         engine = selenium_yaml.SeleniumYAML(
             yaml_file=performance_data["path"],
-            driver=self.engine.driver,
-            save_screenshots=self.engine.save_screenshots,
-            parse_template=self.engine.parse_template,
-            template_context=self.engine.template_context
+            driver=driver,
+            save_screenshots=performance_data["save_screenshots"],
+            parse_template=performance_data["parse_template"],
+            template_context=performance_data["template_context"]
         )
+        engine.performance_context = performance_context
         engine.perform(quit=False)
 
     class Meta:
-        fields = ["path"]
+        fields = ["path", "save_screenshots", "parse_template",
+                  "template_context"]
 
 
 class CallAPIStep(BaseStep):
@@ -185,7 +185,7 @@ class CallAPIStep(BaseStep):
     body = fields.DictField(required=False, default={})
     headers = fields.DictField(required=False, default={})
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Calls the given URL with the given method and body """
         req = requests.Request(
             url=performance_data["url"],
@@ -222,7 +222,7 @@ class IteratorStep(BaseStep):
     iterator = fields.ResolvedVariableField(required=True, required_type=list)
     steps = fields.NestedStepsField()
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Iterates over the ``iterator`` array (which should be a list -
             either resolved or by default) and performs each step once per item
         """
@@ -235,20 +235,24 @@ class IteratorStep(BaseStep):
                 "iterated over"
             )
 
+        step_context = {}
         for item in iterator:
-            extra_context = {"current_iterator": item}
+            performance_context["current_iterator"] = item
             for step_title, step in steps.items():
                 try:
-                    step.run_step(
-                        save_screenshot=self.engine.save_screenshots,
-                        extra_context=extra_context
+                    step_context[step_title] = step.run_step(
+                        driver=driver,
+                        performance_context=performance_context,
+                        # TODO; move save_screenshot to YAML
+                        save_screenshots=False
                     )
                 except exceptions.StepPerformanceError:
                     logger.exception(
                         "Ran into an exception while performing {step_title}",
                         step_title=step_title
                     )
-                    break
+                    raise
+        return step_context
 
     class Meta:
         fields = ["iterator", "steps"]
@@ -268,11 +272,10 @@ class ConditionalStep(BaseStep):
     negate = fields.BooleanField(required=True, default=False)
     steps = fields.NestedStepsField()
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Executes all of the nested steps if the given ``value``
             (resolved/xpath) is equal to the given ``equals`` field
         """
-        driver = self.engine.driver
         value = performance_data["value"]
         equals = performance_data["equals"]
         steps = performance_data["steps"]
@@ -302,10 +305,14 @@ class ConditionalStep(BaseStep):
 
         if condition:
             logger.debug(f"{value} {operator} {equals}; executing sub-steps.")
+            step_context = {"success": True}
             for step_title, step in steps.items():
                 try:
-                    step.run_step(
-                        save_screenshot=self.engine.save_screenshots
+                    step_context[step_title] = step.run_step(
+                        driver=driver,
+                        performance_context=performance_context,
+                        # TODO: Move save_screenshot to YAML
+                        save_screenshots=False
                     )
                 except exceptions.StepPerformanceError:
                     logger.exception(
@@ -313,7 +320,7 @@ class ConditionalStep(BaseStep):
                         step_title=step_title
                     )
                     break
-            return {"success": True}
+            return step_context
         else:
             logger.debug(f"{value} != {equals}; skipping sub-steps.")
             return {"success": False}
@@ -337,11 +344,10 @@ class StoreXpathStep(BaseStep):
     select_first = fields.BooleanField(required=True, default=False)
     variable = fields.CharField(required=True)
 
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Returns the xpath selector's value so that it gets stored in
             the engine performance data
         """
-        driver = self.engine.driver
         selector = performance_data["selector"]
         variable = performance_data["variable"]
         select_first = performance_data["select_first"]
@@ -363,10 +369,10 @@ class StorePageUrlStep(BaseStep):
     """ Step for storing the current page url into a ``Step Title__url``
         variable so that it can be accessed later on
     """
-    def perform(self, performance_data):
+    def perform(self, driver, performance_data, performance_context):
         """ Returns the current driver URL for later access """
         return {
-            "url": self.engine.driver.current_url
+            "url": driver.current_url
         }
 
     class Meta:
