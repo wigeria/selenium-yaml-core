@@ -6,11 +6,26 @@
     </title>
 </head>
 <body>
-    <form>
+    <div>
         <input placeholder="email" name="email" />
-        <input placeholder="password" name="password" type="password" />
-
-        <input type="submit" value="Submit" />
-    </form>
+    </div>
+    <div>
+        <select id="select">
+            <option value="opt1">Option 1</option>
+            <option value="opt2">Option 2</option>
+        </select>
+    </div>
+    <div>
+        <button id="submit">Submit</button>
+    </div>
+    <script>
+        // Adds a `Clicked Successfully` element on the page on submit click
+        document.getElementById('submit').addEventListener("click", function () {
+            var node = document.createElement("p");
+            node.setAttribute("id", "clicked-successfully")
+            node.appendChild(document.createTextNode("Clicked Successfully."));
+            document.body.appendChild(node);
+        })
+    </script>
 </body>
 </html>

@@ -52,6 +52,7 @@ def substitute_placeholders(value, context):
             # Only replaces the placeholder if the resolution is valid
             resolved_value = resolve_variable(context, placeholder)
             placeholder_string = "${" + placeholder + "}"
+            # TODO: Problematic for resolved values that are false-y; '', 0, etc.
             if resolved_value:
                 if placeholder_count == 1 and value == placeholder_string:
                     # This is for cases where we need the placeholder to be

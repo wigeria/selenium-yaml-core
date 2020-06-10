@@ -285,11 +285,15 @@ class ConditionalStep(BaseStep):
         # value in ``validated_data`` since the value is resolved through
         # ``get_performance_data()`` in ``run_step()``
         if value == self.validated_data["value"]:
-            value = utils.execute_xpath(driver, value)
-            # Converting the ``equals`` value to a list, since
-            # resolved xpath is always a list
-            if not isinstance(equals, list):
-                equals = [equals]
+            try:
+                value = utils.execute_xpath(driver, value)
+                # Converting the ``equals`` value to a list, since
+                # resolved xpath is always a list
+                if not isinstance(equals, list):
+                    equals = [equals]
+            except sel_exceptions.JavascriptException:
+                # Ignoring the exception if it just isn't valid xpath
+                pass
 
         # Converting both ``value`` and ``equals`` to sets if they're arrays
         if isinstance(value, list) and isinstance(equals, list):

@@ -122,12 +122,14 @@ class SeleniumYAML:
         """
         logger.debug("Starting step performance sequence...")
         assert self.driver, "Driver must be initialized prior to performance."
+        screenshots_path = os.path.join(os.getcwd(), "screenshots", self.title)
         for step_title, step in self.steps.items():
             try:
                 step_data = step.run_step(
                     self.driver,
                     self.performance_context,
-                    save_screenshots=self.save_screenshots)
+                    save_screenshots=self.save_screenshots,
+                    screenshots_path=screenshots_path)
             except exceptions.StepPerformanceError:
                 logger.exception(
                     "Ran into an exception while performing {step_title}",

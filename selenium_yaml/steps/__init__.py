@@ -33,7 +33,7 @@ class BaseStep:
         attribute containing an iterable of attribute names on the step
         which will point to the fields that need to be validated
     """
-    def __init__(self, step_data=None, title=None, screenshots_path=None):
+    def __init__(self, step_data=None, title=None):
         """ Creates a new instance of the step and sets attributes that will
             be modified during validation so that the step can be performed
 
@@ -45,14 +45,9 @@ class BaseStep:
 
             ``title`` : A unique identifier for this step that is used
                 for logging
-
-            ``screenshots_path`` : Path to the directory where the screenshots
-                for this step should be saved (only required if enabled in
-                ``run_step``)
         """
         self.step_data = step_data
         self.title = title
-        self.screenshots_path = screenshots_path
         # This should get set to the validated in ``is_valid`` if it's
         # validated successfully
         self._validated_data = None
@@ -110,20 +105,21 @@ class BaseStep:
                 raise exceptions.ValidationError(self.errors)
             return False
 
-    def save_screenshot(self, driver):
+    def save_screenshot(self, driver, screenshots_path):
         """ Debug method for taking a full-screen screenshot of the driver
             and saving it to the ``screenshots_path`` directory
         """
-        if not os.path.exists(self.screenshots_path):
-            os.makedirs(self.screenshots_path)
+        if not os.path.exists(screenshots_path):
+            os.makedirs(screenshots_path)
 
-        fname = os.path.join(self.screenshots_path, f"{self.title}.png")
+        fname = os.path.join(screenshots_path, f"{self.title}.png")
         with open(fname, 'wb') as outf:
             el = driver.find_element_by_tag_name('body')
             outf.write(el.screenshot_as_png)
         return fname
 
-    def run_step(self, driver, performance_context, save_screenshots=False):
+    def run_step(self, driver, performance_context,
+                 save_screenshots=False, screenshots_path=None):
         """ Performs the step using the ``perform`` method and logs any details
             through the ``step_title`` attribute
 
@@ -138,6 +134,9 @@ class BaseStep:
 
             ``save_screenshots`` : Boolean for whether screenshots should be
                 saved for this step or not
+
+            ``screenshots_path`` : Path to the directory where the screenshots
+                for this step should be saved (if enabled)
         """
         logger.debug("Performing step {title}.", title=self.title)
 
@@ -149,13 +148,14 @@ class BaseStep:
                 driver, performance_data, performance_context) or {}
         except exceptions.StepPerformanceError:
             if save_screenshots:
-                logger.debug(f"Screenshot saved at {self.save_screenshot(driver)}")
+                logger.debug("Screenshot saved at " +
+                             self.save_screenshot(driver, screenshots_path))
             raise
         except:
             error_msg = f"Uncaught error while performing {self.title}."
             if save_screenshots:
-                error_msg += \
-                    f" Screenshot saved at {self.save_screenshot(driver)}"
+                error_msg += f" Screenshot saved at " + \
+                    self.save_screenshot(driver, screenshots_path)
             raise exceptions.StepPerformanceError(error_msg)
 
         if not isinstance(step_data, dict):
@@ -164,7 +164,8 @@ class BaseStep:
         logger.debug("Successfully performed step {title}.", title=self.title)
         logger.debug(f"Added step data {self.internal_title}: {step_data}.")
         if save_screenshots:
-            logger.debug(f"Screenshot saved at {self.save_screenshot(driver)}")
+            logger.debug(f"Screenshot saved at " +
+                         self.save_screenshot(driver, screenshots_path))
 
         return step_data
 

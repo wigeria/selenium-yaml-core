@@ -43,9 +43,6 @@ class YAMLParser:
                 "The ``steps`` in the YAML are not in a list format."
             )
         self.bot_title = self.yaml_data["title"]
-        self.screenshots_path = os.path.join(
-            os.getcwd(), "screenshots", self.bot_title
-        )
 
     def validate(self):
         """ Validates the ``yaml_data`` attribute and initializes the steps
@@ -75,8 +72,7 @@ class YAMLParser:
                     f"not found."
                 continue
             # Then validates that the step has a valid set of data
-            step_cls = step_cls(step_data=step, title=step_title,
-                                screenshots_path=self.screenshots_path)
+            step_cls = step_cls(step_data=step, title=step_title)
             if not step_cls.is_valid():
                 self._errors[step_title] = step_cls.errors
             else:

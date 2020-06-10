@@ -21,7 +21,7 @@ class FieldTestMixin:
 
             value : The value that should be passed on to the field
         """
-        assert field.validate(value, step) == value
+        assert field.validate(value) == value
         assert isinstance(field.errors, list)
         assert len(field.errors) == 0
         assert field.value == value
@@ -37,7 +37,7 @@ class FieldTestMixin:
             value : The value that should be passed on to the field
         """
         with pytest.raises(exceptions.ValidationError) as _:
-            field.validate(value, step)
+            field.validate(value)
         assert isinstance(field.errors, list)
         assert len(field.errors) > 0
 
