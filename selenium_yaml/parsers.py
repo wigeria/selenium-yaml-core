@@ -5,12 +5,11 @@ as YAML Dicts
 Basic Usage:
     # Todo
 """
+from collections import OrderedDict
+
+import yaml
 from selenium_yaml import exceptions
 from selenium_yaml.steps.registered_steps import get_registered_step
-from collections import OrderedDict
-import yaml
-import os
-
 
 DUPLICATE_ERROR = "Step titles must be unique"
 MISSING_TITLE_ERROR = "A step doesn't have a ``title`` attribute."
@@ -34,7 +33,7 @@ class YAMLParser:
         assert isinstance(self.yaml_data, dict), (
             "Invalid YAML Schema. The data must be in a format of "
             "{title, steps: [...]}"
-        ) 
+        )
         assert "title" in self.yaml_data, (
             "The YAML doesn't have a ``title`` key for the bot."
         )
@@ -43,6 +42,9 @@ class YAMLParser:
                 "The ``steps`` in the YAML are not in a list format."
             )
         self.bot_title = self.yaml_data["title"]
+
+        self._validated_steps = None
+        self._errors = None
 
     def validate(self):
         """ Validates the ``yaml_data`` attribute and initializes the steps
@@ -69,7 +71,7 @@ class YAMLParser:
                 step_cls = get_registered_step(step.pop("action", None))
             except KeyError:
                 self._errors[step_title] = f"{step_title}'s ``step_cls`` " + \
-                    f"not found."
+                    "not found."
                 continue
             # Then validates that the step has a valid set of data
             step_cls = step_cls(step_data=step, title=step_title)

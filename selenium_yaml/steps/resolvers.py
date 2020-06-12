@@ -24,9 +24,20 @@ def resolve_variable(data, key):
     if key:
         current_level = key.pop(0)
         if isinstance(data, dict):
+            # If data is a dictionary, try to get the key from the dictionary
             if current_level in data:
                 return resolve_variable(data[current_level], key)
             return None
+        elif isinstance(data, list):
+            # If data is a list, try to get the index for the list
+            try:
+                value = data[int(current_level)]
+            except IndexError:
+                return None
+            except ValueError:
+                raise ValueError(f"`{current_level}` must be an integer since "
+                                 f"`{data}` is an array.")
+            return resolve_variable(value, key)
         else:
             raise ValueError(
                 f"Can't query non-dict for value ``{current_level}``."
@@ -52,15 +63,19 @@ def substitute_placeholders(value, context):
             # Only replaces the placeholder if the resolution is valid
             resolved_value = resolve_variable(context, placeholder)
             placeholder_string = "${" + placeholder + "}"
-            # TODO: Problematic for resolved values that are false-y; '', 0, etc.
-            if resolved_value:
-                if placeholder_count == 1 and value == placeholder_string:
-                    # This is for cases where we need the placeholder to be
-                    # replaced as is; steps should handle their own conversions
-                    value = resolved_value
-                else:
+            if placeholder_count == 1 and value == placeholder_string:
+                # This is for cases where we need the placeholder to be
+                # replaced as is; steps should handle their own conversions
+                value = resolved_value
+            else:
+                if resolved_value is not None:
                     value = value.replace(
                         placeholder_string,
                         str(resolved_value)
                     )
+    elif isinstance(value, dict):
+        value = {
+            k: substitute_placeholders(v, context) for k, v in value.items()}
+    elif isinstance(value, list):
+        value = [substitute_placeholders(i, context) for i in value]
     return value

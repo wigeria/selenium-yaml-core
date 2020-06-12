@@ -5,11 +5,13 @@ a BaseStep that can be used for building customized Steps
 Basic Example:
     # Todo
 """
-from selenium_yaml import exceptions
-from selenium_yaml import fields as step_fields
-from selenium_yaml.steps import resolvers
-from loguru import logger
 import os
+import types
+
+from loguru import logger
+
+import selenium_yaml.exceptions as exceptions
+from selenium_yaml.steps import resolvers
 
 
 class BaseStep:
@@ -65,7 +67,8 @@ class BaseStep:
         self._validated_data = {}
         for field in self.Meta.fields:
             if not hasattr(self, field) or not \
-                    isinstance(getattr(self, field), step_fields.Field):
+                    isinstance(getattr(self, field, "validate"),
+                               types.MethodType):
                 raise ValueError(f"`{field}` is not a valid field")
             field_instance = getattr(self, field)
             field_default = field_instance.default
@@ -210,9 +213,10 @@ class BaseStep:
     def internal_title(self):
         """ Returns the title in a format usable as an engine variable that can
             be resolved through `resolvers.resolve_variable`
-            Just replaces all double underscores with `\\_`
+            Just replaces all double underscores with `\\_` and all pipes
+            with `\\\\`
         """
-        return self.title.replace("__", "\\_")
+        return self.title.replace("__", "\\_").replace("|", "\\\\")
 
     def resolve_step_data(self, performance_context):
         """ Uses the validated data and formats all fields with the engine's

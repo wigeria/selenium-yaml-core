@@ -10,8 +10,8 @@ does with it's serializers and fields
 Basic Example:
     # Todo
 """
-from selenium_yaml import validators as field_validators
 from selenium_yaml import exceptions
+from selenium_yaml import validators as field_validators
 
 
 class Field:
@@ -88,8 +88,8 @@ class Field:
 
 class CharField(Field):
     """ Field defining validation used commonly for character fields """
-    def __init__(self, max_length=None, validators=None, options=None,
-                 *args, **kwargs):
+    def __init__(self, *args, max_length=None, validators=None, options=None,
+                 **kwargs):
         """ Creates an instance of a CharacterField and adds a max-length
             validator to it if the ``max_length`` attribute is specified and
             also adds a ``validators.TypeValidator(field_type=str)`` validator
@@ -116,52 +116,52 @@ class CharField(Field):
 
 class IntegerField(Field):
     """ Field defining validation used commonly for integer fields """
-    def __init__(self, validators=None, *args, **kwargs):
+    def __init__(self, *args, validators=None, **kwargs):
         """ Creates an instance of a IntegerField and adds a
             ``validators.TypeValidator(field_type=int)`` validator
         """
         validators = validators or []
         validators.append(field_validators.TypeValidator(field_type=int))
 
-        return super().__init__(*args, validators=validators, **kwargs)
+        super().__init__(*args, validators=validators, **kwargs)
 
 
 class BooleanField(Field):
     """ Field defining validation used commonly for boolean fields """
-    def __init__(self, validators=None, *args, **kwargs):
+    def __init__(self, *args, validators=None, **kwargs):
         """ Creates an instance of a BooleanField and adds a
             ``validators.TypeValidator(field_type=bool)`` validator
         """
         validators = validators or []
         validators.append(field_validators.TypeValidator(field_type=bool))
 
-        return super().__init__(*args, validators=validators, **kwargs)
+        super().__init__(*args, validators=validators, **kwargs)
 
 
 class DictField(Field):
     """ Field defining validation used commonly for dictionary fields """
-    def __init__(self, validators=None, *args, **kwargs):
+    def __init__(self, *args, validators=None, **kwargs):
         """ Creates an instance of a DictField and adds a
             ``validators.TypeValidator(field_type=dict)`` validator
         """
         validators = validators or []
         validators.append(field_validators.TypeValidator(field_type=dict))
 
-        return super().__init__(*args, validators=validators, **kwargs)
+        super().__init__(*args, validators=validators, **kwargs)
 
 
 class FilePathField(Field):
     """ Field that adds a ``validators.FilePathValidator`` which confirms that
         the given value is a valid file path
     """
-    def __init__(self, validators=None, *args, **kwargs):
+    def __init__(self, *args, validators=None, **kwargs):
         """ Creates an instance of a FilePathField and adds a
             ``validators.FilePathValidator`` validator
         """
         validators = validators or []
         validators.append(field_validators.FilePathValidator())
 
-        return super().__init__(*args, validators=validators, **kwargs)
+        super().__init__(*args, validators=validators, **kwargs)
 
 
 class ResolvedVariableField(Field):
@@ -169,7 +169,7 @@ class ResolvedVariableField(Field):
         confirms that the field's value is in the format of `${VARIABLE}` or
         is of the required type already
     """
-    def __init__(self, required_type=None, validators=None, *args, **kwargs):
+    def __init__(self, *args, required_type=None, validators=None, **kwargs):
         """ Creates an instance of a ResolvedVariableField and adds a
             ``validators.ResolvedVariableValidator`` validator
         """
@@ -180,7 +180,7 @@ class ResolvedVariableField(Field):
             )
         )
 
-        return super().__init__(*args, validators=validators, **kwargs)
+        super().__init__(*args, validators=validators, **kwargs)
 
 
 class NestedStepsField(Field):
@@ -202,4 +202,3 @@ class NestedStepsField(Field):
             step_cls = validator.validate(sub_step)
             validated_steps[step_cls.title] = step_cls
         return super().validate(validated_steps)
-

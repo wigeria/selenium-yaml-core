@@ -20,6 +20,7 @@ def get_error_display(detail):
         return get_error_display(detail.detail)
     elif isinstance(detail, str):
         return detail
+    return None
 
 
 class ValidationError(Exception):

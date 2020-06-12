@@ -7,7 +7,6 @@ Each custom created step must be registered using the included
 from selenium_yaml import steps
 from selenium_yaml.steps import core_steps
 
-
 REGISTERED_STEPS = {
     "navigate": core_steps.NavigateStep,
     "wait": core_steps.WaitStep,

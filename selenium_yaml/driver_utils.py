@@ -1,13 +1,13 @@
 """
 Module containing some common methods used in Selenium bots
 """
-from selenium_yaml.exceptions import StepPerformanceError
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
 from selenium_yaml import exceptions
+from selenium_yaml.exceptions import StepPerformanceError
 
 
 def wait_for_element(driver, xpath_sel, timeout=10):

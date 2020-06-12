@@ -4,21 +4,20 @@ Module containing all of the basic steps required for common Selenium use-cases
 All of the steps contained here are derived from the BaseStep class and build
 their own ``perform`` and ``validate`` methods
 """
-import selenium_yaml
-from selenium_yaml import exceptions
-from selenium_yaml import fields
-from selenium_yaml import validators
-from selenium_yaml.steps import BaseStep
-import selenium_yaml.driver_utils as utils
 import json
-from loguru import logger
-import requests
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import Select
-import selenium.common.exceptions as sel_exceptions
 import time
+
+import requests
+import selenium.common.exceptions as sel_exceptions
+from loguru import logger
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import Select, WebDriverWait
+
+import selenium_yaml
+import selenium_yaml.driver_utils as utils
+from selenium_yaml import exceptions, fields, validators
+from selenium_yaml.steps import BaseStep
 
 
 class NavigateStep(BaseStep):
@@ -94,8 +93,8 @@ class ClickElementStep(BaseStep):
 
     def perform(self, driver, performance_data, performance_context):
         """ Clicks on the given ``element`` """
-        el = utils.wait_for_element(driver, performance_data["element"])
-        el.click()
+        elem = utils.wait_for_element(driver, performance_data["element"])
+        elem.click()
 
     class Meta:
         fields = ["element"]
@@ -114,10 +113,10 @@ class TypeTextStep(BaseStep):
 
     def perform(self, driver, performance_data, performance_context):
         """ Clicks on the given ``element`` """
-        el = utils.wait_for_element(driver, performance_data["element"])
+        elem = utils.wait_for_element(driver, performance_data["element"])
         if performance_data["clear"]:
             el.clear()
-        el.send_keys(performance_data["text"])
+        elem.send_keys(performance_data["text"])
 
     class Meta:
         fields = ["element", "text", "clear"]
@@ -135,8 +134,8 @@ class SelectOptionStep(BaseStep):
 
     def perform(self, driver, performance_data, performance_context):
         """ Selects the given ``option`` in the given ``element`` """
-        el = utils.wait_for_element(driver, performance_data["element"])
-        select_el = Select(el)
+        elem = utils.wait_for_element(driver, performance_data["element"])
+        select_el = Select(elem)
         try:
             select_el.select_by_value(performance_data["option"])
         except sel_exceptions.NoSuchElementException:
@@ -168,7 +167,7 @@ class RunBotStep(BaseStep):
             template_context=performance_data["template_context"]
         )
         engine.performance_context = performance_context
-        engine.perform(quit=False)
+        engine.perform(quit_driver=False)
 
     class Meta:
         fields = ["path", "save_screenshots", "parse_template",
@@ -243,7 +242,6 @@ class IteratorStep(BaseStep):
                     step_context[step_title] = step.run_step(
                         driver=driver,
                         performance_context=performance_context,
-                        # TODO; move save_screenshot to YAML
                         save_screenshots=False
                     )
                 except exceptions.StepPerformanceError:
@@ -315,7 +313,6 @@ class ConditionalStep(BaseStep):
                     step_context[step_title] = step.run_step(
                         driver=driver,
                         performance_context=performance_context,
-                        # TODO: Move save_screenshot to YAML
                         save_screenshots=False
                     )
                 except exceptions.StepPerformanceError:

@@ -7,9 +7,9 @@ in this module
 Basic Example:
     # TODO
 """
-from selenium_yaml import exceptions
-from selenium_yaml import steps
 import os
+
+from selenium_yaml import exceptions, steps
 
 
 class Validator:
@@ -126,7 +126,7 @@ class MaxLengthValidator(Validator):
     """ Validator which checks to make sure that the length of the value is
         smaller than the ``maximum_length`` provided
     """
-    def __init__(self, length=100, *args, **kwargs):
+    def __init__(self, *args, length=100, **kwargs):
         """ Adds a length attribute to the validator prior to init """
         self.length = length
         super().__init__(*args, **kwargs)
@@ -134,7 +134,7 @@ class MaxLengthValidator(Validator):
     def validate(self, value):
         """ Validates that the value has a smaller length than self.length """
         try:
-            value_len = len(value)
+            len(value)
         except TypeError:
             raise exceptions.ValidationError("Value has no attribute len()")
         if len(value) > self.length:
@@ -146,7 +146,7 @@ class TypeValidator(Validator):
     """ Validator which checks to make sure that the type of the value matches
         the given ``field_type``
     """
-    def __init__(self, field_type=str, *args, **kwargs):
+    def __init__(self, *args, field_type=str, **kwargs):
         """ Adds a ``field_type`` attribute to the validator prior to init """
         self.field_type = field_type
         super().__init__(*args, **kwargs)
@@ -162,7 +162,7 @@ class OptionsValidator(Validator):
     """ Validator which checks to make sure that the given ``value`` is a
         part of the given ``options`` array
     """
-    def __init__(self, options=None, *args, **kwargs):
+    def __init__(self, *args, options=None, **kwargs):
         """ Adds a ``options`` attribute to the validator prior to init """
         self.options = options or []
         super().__init__(*args, **kwargs)
@@ -190,7 +190,7 @@ class ResolvedVariableValidator(Validator):
         a performance variable that can be resolved (in the format of
         ``${VARIABLE}``) or is already of the required type
     """
-    def __init__(self, required_type=None, *args, **kwargs):
+    def __init__(self, *args, required_type=None, **kwargs):
         """ Adds a ``required_type`` attribute to the validator prior to
             init
             If ``required_type`` is None, the value will be considered valid

@@ -4,13 +4,14 @@ Core Module for validating, parsing and automating YAML Selenium Bots
 Basic Usage:
     # Todo
 """
-from selenium_yaml import exceptions
-from selenium_yaml.parsers import YAMLParser
-from selenium import webdriver
-from jinja2 import Template
-from loguru import logger
 import os
 
+from jinja2 import Template
+from loguru import logger
+from selenium import webdriver
+
+from selenium_yaml import exceptions
+from selenium_yaml.parsers import YAMLParser
 
 __title__ = 'SeleniumYAML'
 __version__ = '1.0.0'
@@ -24,7 +25,7 @@ class SeleniumYAML:
         item in the `steps` array into an individual "Step"
     """
     @logger.catch(reraise=True)
-    def __init__(self, yaml_file=None,  driver_class=webdriver.Chrome,
+    def __init__(self, yaml_file=None, driver_class=webdriver.Chrome,
                  driver_options=None, driver_executable_path='chromedriver',
                  save_screenshots=False, parse_template=False,
                  template_context=None, driver=None):
@@ -116,9 +117,9 @@ class SeleniumYAML:
         self.driver.quit()
         self.driver = None
 
-    def perform(self, quit=True):
+    def perform(self, quit_driver=True):
         """ Iterates over and performs each step individually
-            If ``quit`` is False, it doesn't quit the driver after performance
+            If ``quit_driver`` is False, it doesn't quit the driver after performance
         """
         logger.debug("Starting step performance sequence...")
         assert self.driver, "Driver must be initialized prior to performance."
@@ -138,5 +139,5 @@ class SeleniumYAML:
                 break
             self.performance_context[step_title] = step_data
         logger.debug("Step performance sequence finished.")
-        if quit:
+        if quit_driver:
             self.__quit_driver()
