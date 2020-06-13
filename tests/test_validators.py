@@ -146,3 +146,13 @@ class TestFilePathValidation(ValidationTestMixin):
         validator = validators.FilePathValidator()
         self.is_successful_validation(validator, value)
 
+
+class TestResolvedVariableValidation(ValidationTestMixin):
+    """ Tests that the ResolvedVariable validation is only valid on a resolved
+        variable or an instance of the given type
+    """
+    def test_validator_on_resolved_var(self):
+        """ Tests that the validation succeeds on a valid resolved var """
+        value = "${resolved_var}"
+        validator = validators.ResolvedVariableValidator()
+        self.is_successful_validation(validator, value)

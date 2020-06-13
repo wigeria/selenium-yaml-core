@@ -67,7 +67,7 @@ class BaseStep:
         self._validated_data = {}
         for field in self.Meta.fields:
             if not hasattr(self, field) or not \
-                    isinstance(getattr(self, field, "validate"),
+                    isinstance(getattr(getattr(self, field), "validate", None),
                                types.MethodType):
                 raise ValueError(f"`{field}` is not a valid field")
             field_instance = getattr(self, field)
@@ -80,7 +80,7 @@ class BaseStep:
             except exceptions.ValidationError as exc:
                 # Passing the error if the validation field seems like it
                 # is something that will use the `performance_data` resolvers
-                if resolvers.find_placeholders(
+                if resolvers.VariableResolver.find_variables(
                         self.step_data.get(field, field_default)):
                     self._validated_data[field] = self.step_data.get(
                         field, field_default)
@@ -225,6 +225,6 @@ class BaseStep:
         data = {}
 
         for key, value in self.validated_data.items():
-            data[key] = resolvers.substitute_placeholders(
-                value, performance_context)
+            resolver = resolvers.VariableResolver(value)
+            data[key] = resolver.render(performance_context)
         return data

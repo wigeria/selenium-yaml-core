@@ -22,9 +22,9 @@ class TestResolvers:
                 }
             }
         }
+        resolver = resolvers.VariableResolver(placeholder)
         assert (
-            resolvers.substitute_placeholders(placeholder, context) ==
-            expected_value
+            resolver.render(context) == expected_value
         )
 
     def test_resolver_against_invalid_resolver(self):
@@ -37,9 +37,9 @@ class TestResolvers:
                 }
             }
         }
+        resolver = resolvers.VariableResolver(placeholder)
         assert (
-            resolvers.substitute_placeholders(placeholder, context) ==
-            placeholder
+            resolver.render(context) == placeholder
         )
 
     def test_resolver_against_array_index(self):
@@ -56,9 +56,9 @@ class TestResolvers:
                 }
             }
         }
+        resolver = resolvers.VariableResolver(placeholder)
         assert (
-            resolvers.substitute_placeholders(placeholder, context) ==
-            expected_value
+            resolver.render(context) == expected_value
         )
 
     def test_resolver_with_complex_value(self):
@@ -92,7 +92,21 @@ class TestResolvers:
                 "key5": [context["var4"], context["var5"]]
             }
         }
+        resolver = resolvers.VariableResolver(placeholder_dict)
         assert (
-            resolvers.substitute_placeholders(placeholder_dict, context) ==
-            expected_result
+            resolver.render(context) == expected_result
+        )
+
+    def test_functions_in_variable(self):
+        """ Tests cases where variables have functions called on them inside
+            a resolved variable
+        """
+        placeholder = "Value is: ${key|lower()|capitalize()|split(',')__0}"
+        key = "ArrayResult,Value"
+        expected_value = f"Value is: Arrayresult"
+        context = {"key": key}
+        resolver = resolvers.VariableResolver(placeholder)
+        assert (
+            resolver.render(context) ==
+            expected_value
         )

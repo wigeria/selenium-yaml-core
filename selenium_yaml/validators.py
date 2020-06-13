@@ -203,7 +203,8 @@ class ResolvedVariableValidator(Validator):
         """ Validates that the value is either a resolved variable or of the
             given ``required_type``
         """
-        placeholders = steps.resolvers.find_placeholders(value)
+        placeholders = steps.resolvers.VariableResolver.find_variables(
+            value)
         no_placeholders = placeholders is None or len(placeholders) != 1
 
         if self.required_type is not None:

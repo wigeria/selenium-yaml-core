@@ -159,4 +159,41 @@ Each step, at minimum, must have a `title` and an `action` key. The `title` will
           element: //input[@name='q']
           text: "Query"
   ```
-  
+
+## Resolved Variables
+
+Inside certain fields inside of steps (mainly all excluding `title` and `action`), variables collected/stored during the runtime of the bot can be used by enclosing them in `${...}` brackets. The variables collected by a certain step is ALWAYS stored in a dictionary named after the step-title; essentially namespacing it (so variables are accessible as `${StepTitle__<variable path>`; see [1]). These variables have certain unique features.
+
+1. Assume we have a variable `x` that is a dictionary containing a key `a`. We can refer to `a` using `${x__a}`. This can be nested - if `a` is another dictionary, and `b` is a key inside `a`, `b` can be referenced as `${x__a__b}`.
+
+2. Lists can be indexed by their zero-index. If `a` is a list inside a dictionary `x`, we can get the first value in the list `a` as `${x__a__0}`. These indices use the python-syntax; `-1` is the last element, `2` is the third element and so on.
+
+3. Certain functions can be called on variables based on their type using the `|` symbol. For example, if we wanted to `split` a string variable `x` by commas and get the first value, we could use `${x|split(',')__0}`. The same logic in [1] and [2] can be used alongside these.
+  1. Note that all "Steps" by themselves are treated as dictionaries as a whole. So if you wanted to get all of the variables stored by a step split by commas, you could use `${step_title|join(',')}`.
+
+### Resolved Variable Functions
+
+Here's the list of all functions available for resolved variables split by their type.
+
+1. String
+  - `split(delim, maxsplit=None)` - Splits the string by the given delimiter.
+  - `upper()` - Uppercases the entire string
+  - `lower()` - Lowercasess the entire string
+  - `capitalize()` - Capitalizes the first letter of the string
+  - `zfill(width)` - Adds zeroes before the string so that it reaches the required width
+  - `strip()` - Strips spaces from before and after the string
+  - `len()` - Gives back the length of the string as an integer
+  - `startswith(prefix)` - Returns a boolean based on whether a string starts with a value or not
+  - `endswith(prefix)` - Returns a boolean based on whether a string ends with a value or not
+
+2. List
+  - `len()` - Returns the length of the string as an integer
+  - `index(value)` - Returns the index of the given value in the list
+  - `reverse()` - Returns the list in reverse
+  - `sort()` - Returns the sorted list
+  - `join(delim)` - Returns the list joined by the delimiter as a string
+
+3. Dict
+  - `get(key, default=None)` - Returns the key if it exists in the dict, otherwise returns the default if provided
+  - `keys()` - Returns a list of all keys in the dictionary
+  - `items()` - Returns a list of tuples of all (key, value) pairs in the dictionary
