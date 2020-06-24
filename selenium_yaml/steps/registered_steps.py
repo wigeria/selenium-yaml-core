@@ -35,11 +35,22 @@ def register_step(friendly_name, step_cls):
         ``step_cls``
 
         The ``step_cls`` is expected to be an instance of ``steps.BaseStep``
-
-        # TODO: Replace this with a class decorator in the future
     """
-    assert isinstance(step_cls, steps.BaseStep)
     global REGISTERED_STEPS
     if friendly_name in REGISTERED_STEPS:
         raise ValueError(f"The name `{friendly_name}` is already registered.")
     REGISTERED_STEPS[friendly_name] = step_cls
+
+
+def selenium_step(friendly_name):
+    """ Decorator for registering a step with a given name """
+    class StepWrapper:
+        def __init__(self, step_cls):
+            self.step_cls = step_cls
+            print(self.step_cls, type(self.step_cls))
+            register_step(friendly_name, self.step_cls)
+
+        def __call__(self, *args, **kwargs):
+            return self.step_cls
+
+    return StepWrapper
