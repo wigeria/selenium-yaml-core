@@ -5,7 +5,7 @@ Basic Usage:
     # TODO
 """
 import argparse
-from selenium_yaml import SeleniumYAML
+import selenium_yaml
 from loguru import logger
 import os
 
@@ -32,6 +32,9 @@ def setup_parser():
         arguments required for the script set up
     """
     parser = argparse.ArgumentParser(description="Run SeleniumYAML Bots~")
+    parser.add_argument('-v', '--version', action='version',
+                        version=selenium_yaml.__title__ + ' ' +
+                        selenium_yaml.__version__)
     parser.add_argument("--yaml-file", type=str, help="Path to the YAML Bot")
 
     parser.add_argument('--screenshots', dest='save_screenshots',
@@ -59,10 +62,10 @@ def main(yaml_file, save_screenshots=False, save_logs=False,
         logger.add(os.path.join("logs", "sally_{time}.log"))
 
     parse_template = True if template_context else False
-    engine = SeleniumYAML(yaml_file=yaml_file,
-                          save_screenshots=save_screenshots,
-                          template_context=template_context,
-                          parse_template=parse_template)
+    engine = selenium_yaml.SeleniumYAML(yaml_file=yaml_file,
+                                        save_screenshots=save_screenshots,
+                                        template_context=template_context,
+                                        parse_template=parse_template)
     engine.perform()
 
 

@@ -235,11 +235,15 @@ class IteratorStep(BaseStep):
             )
 
         step_context = {}
-        for item in iterator:
+        # TODO: Make each step in the iteration be stored in
+        # the `__iter_index__step_title` namespace under this step
+        for index, item in enumerate(iterator):
             performance_context["current_iterator"] = item
+            index = str(index)
+            step_context[index] = {}
             for step_title, step in steps.items():
                 try:
-                    step_context[step_title] = step.run_step(
+                    step_context[index][step_title] = step.run_step(
                         driver=driver,
                         performance_context=performance_context,
                         save_screenshots=False
@@ -250,6 +254,7 @@ class IteratorStep(BaseStep):
                         step_title=step_title
                     )
                     raise
+            performance_context.pop("current_iterator")
         return step_context
 
     class Meta:

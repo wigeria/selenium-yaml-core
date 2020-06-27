@@ -1,0 +1,13 @@
+site_name: SeleniumYAML
+nav:
+  - Home: index.md
+  - Quickstart:
+    - Installation: quickstart/installation.md
+    - Basic Usage: quickstart/basic-usage.md
+    - Customization: quickstart/customization.md
+  - Reference:
+    - Steps: reference/steps.md
+    - Resolved Variables: reference/resolved-variables.md
+    - Fields: reference/fields.md
+    - Validators: reference/validators.md
+theme: readthedocs
