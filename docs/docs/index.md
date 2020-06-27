@@ -20,4 +20,4 @@ To quickly get set up, start following the Quickstart tutorial [here](quickstart
 
 ## Contribute
 
-Contributions of any kind are very welcome. To get started with contributing, refer to the [contribution page]((https://github.com/wigeria/selenium-yaml-core) in our github repo.
+Contributions of any kind are very welcome. To get started with contributing, refer to the [contribution page](https://github.com/wigeria/selenium-yaml-core) in our github repo.
