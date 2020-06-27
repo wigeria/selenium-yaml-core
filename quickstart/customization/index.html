@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Customization - SeleniumYAML</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Customization";
+    var mkdocs_page_input_path = "quickstart\\customization.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> SeleniumYAML</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Quickstart</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../basic-usage/">Basic Usage</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Customization</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#the-structure-of-a-step">The Structure of a Step</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#registering-a-step">Registering a Step</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#custom-validators">Custom Validators</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#custom-fields">Custom Fields</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#running-the-customized-bot">Running the Customized Bot</a>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/steps/">Steps</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/resolved-variables/">Resolved Variables</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/fields/">Fields</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../reference/validators/">Validators</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">SeleniumYAML</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Quickstart &raquo;</li>
+        
+      
+    
+    <li>Customization</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="customization">Customization</h1>
+<p>Most of the functionality provided by SeleniumYAML can be customized and added to for suiting your own needs. This page aims to explain how to modify and add new Steps, Fields and Validators.</p>
+<h2 id="the-structure-of-a-step">The Structure of a Step</h2>
+<p>A Step is defined as a derivative of the <code>selenium_yaml.steps.BaseStep</code> class. There are 3 main things that <em>must</em> be added to each new step.</p>
+<ul>
+<li><code>selenium_yaml.fields.Field</code> Attributes for each field that the step needs to receive as input in the YAML structure of the step</li>
+<li>A Meta class containing a <code>fields</code> list that should have a list of each defined field in the step</li>
+<li>A <code>perform</code> function that will be responsible for performing the actual functionality of the step</li>
+</ul>
+<p>With that taken into account, here's what the core <code>NavigateStep</code> looks like:</p>
+<pre><code class="python">class NavigateStep(BaseStep):
+    &quot;&quot;&quot; Step that performs a ``driver.get`` action with the given
+        ``target_url``
+    &quot;&quot;&quot;
+    url = fields.CharField(required=True)
+
+    def perform(self, driver, performance_data, performance_context):
+        &quot;&quot;&quot; Navigates the driver to the provided ``url`` &quot;&quot;&quot;
+        driver.get(performance_data[&quot;url&quot;])
+
+    class Meta:
+        fields = [&quot;url&quot;]
+</code></pre>
+
+<p>Let's go over each part:</p>
+<pre><code class="python">url = fields.CharField(required=True)
+</code></pre>
+
+<p>This is what is going to be used to receive the <code>url</code> field as input from the YAML. The <code>CharField</code> implements it's own set of validators, which is validated prior to the bot execution. Here's what the step might look like in the YAML:</p>
+<pre><code class="yaml">- title: Step Title
+  action: Step Identifier // This is explained in the Step Registration section
+  url: https://google.com
+</code></pre>
+
+<p>Now, so that the step-parser can actually recognize the existence of that field, it must be added to the Meta class.</p>
+<pre><code class="python">class Meta:
+    fields = [&quot;url&quot;]
+</code></pre>
+
+<p>And finally, the actual performance method for the step:</p>
+<pre><code class="python">def perform(self, driver, performance_data, performance_context):
+    &quot;&quot;&quot; Navigates the driver to the provided ``url`` &quot;&quot;&quot;
+    driver.get(performance_data[&quot;url&quot;])
+</code></pre>
+
+<p>The <code>performance_data</code> variable contains the data provided to the step in the YAML rendered with the <code>performance_context</code>. If you would like to access the raw data as provided in the YAML, you could access it from the <code>step_data</code> attribute on the class (through <code>self.step_data</code> in the <code>perform</code> method). If you would like to access the data after validation, but prior to being rendered, you could access it through the <code>validated_data</code> property on the class.</p>
+<h2 id="registering-a-step">Registering a Step</h2>
+<p>Before a step can be used in the YAML, it needs to be registered. This can be done through the provided class decorator:</p>
+<pre><code class="python">from selenium_yaml.steps.registered_steps import selenium_step
+
+
+@selenium_step(&quot;step identifier&quot;)
+class NavigateStep(BaseStep):
+    ...
+</code></pre>
+
+<p>The Identifier passed into the <code>selenium_step</code> decorator is what is going to be used as the "action" identifier for the step in the YAML. This must be unique; using duplicates will result in an error.</p>
+<h2 id="custom-validators">Custom Validators</h2>
+<p>Custom validators can be created to be used in fields for providing custom validation. All validators should derive from the <code>validators.Validator</code> class. The <code>validate()</code> method can be overwritten to provide custom validation for values, and the <code>__init__</code> method can be overwritten for adding new arguments. Here's an example of a <code>RegexValidator</code> that raises an exception if a value doesn't match the given regex:</p>
+<pre><code class="python">import re
+from selenium_yaml.validators import Validator
+
+class RegexValidator(Validator):
+    &quot;&quot;&quot; Validator which checks to make sure that the given value is matches
+        the given regex
+    &quot;&quot;&quot;
+    def __init__(self, regex, *args, **kwargs):
+        &quot;&quot;&quot; Adds a ``options`` attribute to the validator prior to init &quot;&quot;&quot;
+        self.regex = regex
+        super().__init__(*args, **kwargs)
+
+    def validate(self, value):
+        &quot;&quot;&quot; Validates that the value matches the regex &quot;&quot;&quot;
+        if not re.match(self.regex, value):
+            raise exceptions.ValidationError(
+                f&quot;The `{value}` does not match `{self.regex}`.&quot;)
+</code></pre>
+
+<p>In case of any validation errors, the validators should raise <code>exceptions.ValidationError</code> exceptions so that they can be handled correctly by the parser.</p>
+<h2 id="custom-fields">Custom Fields</h2>
+<p>A Field class can provide it's own methods for Validation (<code>validate</code>) and overwrite the <code>__init__</code> method to add any validators. It is suggested to use <code>validators</code> for validation, instead of just directly validating everything in the <code>validate</code> method.</p>
+<p>Here's a very basic example of a field that adds a custom "RegexValidator" to validate phone numbers:</p>
+<pre><code class="python">from selenium_yaml.fields import Field
+
+
+class PhoneNumberField(Field):
+    &quot;&quot;&quot; Field defining regex validation for phone numbers &quot;&quot;&quot;
+    def __init__(self, *args, validators=None, **kwargs):
+        &quot;&quot;&quot; Creates an instance of a PhoneNumberField and adds a
+            ``RegexValidator`` validator
+        &quot;&quot;&quot;
+        validators = validators or []
+        validators.append(field_validators.RegexValidator(r&quot;\d{3}-\d{3}-\d{4}&quot;))
+
+        super().__init__(*args, validators=validators, **kwargs)
+</code></pre>
+
+<p>These fields can then be used in Steps as required.</p>
+<h2 id="running-the-customized-bot">Running the Customized Bot</h2>
+<p>After all of the customization, you need to execute SeleniumYAML's engine:</p>
+<pre><code class="python">from selenium_yaml import SeleniumYAML
+
+# Define/Import/Register any custom steps here
+
+if __name__ == &quot;__main__&quot;:
+    engine = SeleniumYAML(
+        yaml_file=&quot;path to the yaml file/a file-like object&quot;,
+        save_screenshots=False,  # If true, a screenshot of the driver will be saved after each step
+        template_context={},  # The template context used for rendering the YAML through Jinja
+        parse_template=False  # If true, the template_context will be used to render the YAML through Jinja
+    )
+    engine.perform()
+</code></pre>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../../reference/steps/" class="btn btn-neutral float-right" title="Steps">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../basic-usage/" class="btn btn-neutral" title="Basic Usage"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../basic-usage/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../../reference/steps/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

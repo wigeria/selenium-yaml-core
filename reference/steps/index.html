@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Steps - SeleniumYAML</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Steps";
+    var mkdocs_page_input_path = "reference\\steps.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> SeleniumYAML</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Quickstart</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../quickstart/installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../quickstart/basic-usage/">Basic Usage</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../quickstart/customization/">Customization</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Steps</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#base-fields">Base Fields</a>
+    </li>
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../resolved-variables/">Resolved Variables</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../fields/">Fields</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../validators/">Validators</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">SeleniumYAML</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Reference &raquo;</li>
+        
+      
+    
+    <li>Steps</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="steps">Steps</h1>
+<p>This is a reference for the steps included with the library. For details on creating your own custom steps, refer to <a href="quickstart/customization.md">this page</a>.</p>
+<p>Notes:
+  - Details about Resolved Variables mentioned herein can be found <a href="reference/resolved-variables.md">here</a>
+  - The fields that are required are highlighted in bold</p>
+<h2 id="base-fields">Base Fields</h2>
+<p>All steps must have the following two fields in the YAML, so that they can be identified and validated by the parser.</p>
+<pre><code>title
+</code></pre>
+
+<p>The <code>title</code> field is used as a unique namespace for a step within a bot. This name is used for storing and accessing <code>performance_context</code> for the step as well as for a few other tasks that require namespacing such as screenshots, passing back validation errors, etc.</p>
+<pre><code>action
+</code></pre>
+
+<p>This field is used to identify the class of the Step that needs to be performed. Each of the core steps have their own identifier that they're registered using, and any custom steps must also be registered with their own unique identifier through the <code>selenium_yaml.steps.registered_steps.selenium_step</code> decorator as described <a href="/quickstart/customization/#registering-a-step">here</a>.</p>
+<h1 id="core-steps">Core Steps</h1>
+<h2 id="navigatestep">NavigateStep</h2>
+<pre><code class="yaml">  - title: Navigate to URL
+    action: navigate
+    url: &lt;URL to navigate to&gt;
+</code></pre>
+
+<ul>
+<li><strong><code>url</code></strong> - <code>CharField</code> for the URL that the driver should be navigated to</li>
+</ul>
+<p>This step performs a <code>driver.get</code> action with the provided URL.</p>
+<h2 id="waitstep">WaitStep</h2>
+<pre><code class="yaml">  - title: Wait for a fixed amount of time
+    action: wait
+    seconds: &lt;Seconds to wait for&gt;
+</code></pre>
+
+<ul>
+<li><strong><code>seconds</code></strong> - <code>IntegerField</code> for the number of steps to wait for</li>
+</ul>
+<p>This step performs a wait for the given number of <code>seconds</code> using <code>time.sleep()</code>.</p>
+<h2 id="waitforelementstep">WaitForElementStep</h2>
+<pre><code class="yaml">  - title: Wait for the element to be clickable
+    action: wait_for_element
+    element: &lt;Xpath selector for the element&gt;
+    seconds: &lt;Seconds to wait for&gt;
+</code></pre>
+
+<ul>
+<li><strong><code>element</code></strong> - <code>CharField</code> for the XPath selector for the element to wait for</li>
+<li><strong><code>seconds</code></strong> - <code>IntegerField</code> for the number of seconds to wait for</li>
+</ul>
+<p>This step performs waits for the presence of the given <code>element</code> for the given number of <code>seconds</code>.</p>
+<h2 id="clickelementstep">ClickElementStep</h2>
+<pre><code class="yaml">  - title: Click on an element
+    action: click
+    element: &lt;Xpath Selector for the Element&gt;
+</code></pre>
+
+<ul>
+<li><strong><code>element</code></strong> - <code>CharField</code> for the XPath selector for the element to click on</li>
+</ul>
+<p>This step clicks on the <code>element</code> identified by the XPath using <code>driver.click()</code>.</p>
+<h2 id="typetextstep">TypeTextStep</h2>
+<pre><code class="yaml">  - title: Type text into an element
+    action: type
+    element: &lt;Xpath Selector for the Element&gt;
+    text: Text to type into the element
+    clear: True|False
+</code></pre>
+
+<ul>
+<li><strong><code>element</code></strong> - <code>CharField</code> for the XPath selector for the element to send text to</li>
+<li><strong><code>text</code></strong> - <code>CharField</code> for the text to send to the element</li>
+<li><code>clear</code> - <code>BooleanField</code>; if True, clears the field prior to sending any text</li>
+</ul>
+<p>This step sends the given <code>text</code> to the given <code>element</code> using <code>driver.send_keys()</code>.</p>
+<h2 id="selectoptionstep">SelectOptionStep</h2>
+<pre><code class="yaml">  - title: Select an option from a `select` element
+    action: select
+    element: &lt;Xpath selector for the Select element&gt;
+    option: &lt;Value of the option that should be selected&gt;
+</code></pre>
+
+<ul>
+<li><strong><code>element</code></strong> - <code>CharField</code> for the XPath selector for the select element</li>
+<li><strong><code>option</code></strong> - <code>CharField</code> for the value of the option in the select element that should be selected</li>
+</ul>
+<p>This step selects the given <code>option</code> in the given select <code>element</code>.</p>
+<h2 id="runbotstep">RunBotStep</h2>
+<pre><code class="yaml">  - title: Run another bot with it's file path
+    action: run_bot
+    path: /path/to/the/bot
+    save_screenshots: True|False
+    parse_template: True|False
+    template_context:
+      - Key: Value
+</code></pre>
+
+<ul>
+<li><strong><code>path</code></strong> - <code>FilePathField</code> to the path of the both that should be run</li>
+<li><code>save_screenshots</code> - <code>BooleanField</code> for whether this bot should have screenshots' saved or not</li>
+<li><code>parse_template</code> - <code>BooleanField</code>; if True, the <code>template_context</code> field will be used for rendering the Bot's YAML as a Jinja Template prior to execution</li>
+<li><code>template_context</code> - <code>ResolvedVariableField(required_type=dict)</code> field that can either be a resolved variable or a dictionary, and will be used for rendering the Bot's YAML if <code>parse_template</code> is True</li>
+</ul>
+<p>This step is used for running another bot with the current performance context available in the bot.</p>
+<h2 id="callapistep">CallAPIStep</h2>
+<pre><code class="yaml">  - title: Call an API and store it's response and status code
+    action: make_request
+    method: GET
+    url: https://url-to-request.com/?queryParams=value
+    body: 
+      Key: Value
+    headers:
+      Key: Value
+</code></pre>
+
+<ul>
+<li><strong><code>url</code></strong> - <code>CharField</code> for the URL that should be requested</li>
+<li><strong><code>method</code></strong> - <code>CharField(options=["GET", "PUT", "POST"])</code> for the request method that should be used</li>
+<li><code>body</code> - <code>DictField</code> for the request body</li>
+<li><code>headers</code> - <code>DictField</code> for the request headers</li>
+</ul>
+<p>This step is used for sending a request with the given details and storing the response's body in the <code>context</code> and <code>status_code</code> performance context variables under the step's namespace</p>
+<h2 id="iteratorstep">IteratorStep</h2>
+<pre><code class="yaml">  - title: Iterate over an array (resolved/directly provided)
+    action: iterate_over
+    iterator:
+      - Array
+    steps:
+      - title: Array of steps (step-1)
+        action: navigate
+        url: navigate-url
+      ...
+</code></pre>
+
+<ul>
+<li><strong><code>iterator</code></strong> - <code>ResolvedVariableField(required_type=list)</code> field for the array to iterate over</li>
+<li><strong><code>steps</code></strong> - <code>NestedStepsField</code> containing an array of steps that should be performed for each element in the <code>iterator</code></li>
+</ul>
+<p>This step is used to perform all of the steps in the <code>steps</code> array for each element in the <code>iterator</code>. The context for each iteration is stored under the <code>step_title__iter_index__sub_step_title</code> namespace. The <code>iterator</code> could also be a resolved variable if required. In the steps in the iterator, a performance context variable for the current element being iterated over is available at <code>${current_iterator}</code>.</p>
+<h2 id="conditionalstep">ConditionalStep</h2>
+<pre><code class="yaml">  - title: Conditionally run a step
+    action: conditional
+    value: Value to be checked
+    equals: This is what `value` needs to equal
+    negate: True|False
+    steps:
+      - title: Array of steps (step-1)
+        action: navigate
+        url: navigate-url
+        ...
+</code></pre>
+
+<ul>
+<li><strong><code>value</code></strong> - <code>CharField</code> that can be an XPath selector to a value (<strong>not an element</strong>), or a string, or a resolved variable of any other type</li>
+<li><strong><code>equals</code></strong> - <code>CharField</code> that the <code>value</code> is check against</li>
+<li><code>negate</code> - <code>BooleanField</code>; if True, the <code>value</code> must equal <code>equals</code> for the condition to pass - otherwise, the <code>value</code> must <strong>not</strong> equal <code>equals</code> for the condition to pass</li>
+<li><strong><code>steps</code></strong> - <code>NestedStepsField</code> containing an array of steps that should be performed if the condition passes</li>
+</ul>
+<p>This step is used for conditionally running a set of steps.</p>
+<h2 id="storexpathstep">StoreXpathStep</h2>
+<pre><code class="yaml">  - title: Store the result of a given xpath selector in the performance context
+    action: store_xpath
+    selector: &quot;//xpath/selector/@attribute&quot;
+    variable: Variable To Store Result In
+    select_first: True|False
+</code></pre>
+
+<ul>
+<li><strong><code>selector</code></strong> - <code>CharField</code> for the selector to the attribute/prop that should be stored</li>
+<li><strong><code>variable</code></strong> - <code>CharField</code> for the variable name that the <code>selector</code>'s result will be stored in under the step's namespace</li>
+<li><code>select_first</code> - <code>BooleanField</code>; if True, will store only the first match for the selector - otherwise, stores all of the matches in the <code>variable</code> as an array</li>
+</ul>
+<p>This step is used for storing something in the page in the performance context for later use.</p>
+<h2 id="storepageurlstep">StorePageUrlStep</h2>
+<pre><code class="yaml">  - title: Store the current page's URL in a &lt;Step Title&gt;__url variable for later use
+    action: store_page_url
+</code></pre>
+
+<p>This step is used for storing the current page URL in a <code>url</code> variable under the step's namespace.</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../resolved-variables/" class="btn btn-neutral float-right" title="Resolved Variables">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../../quickstart/customization/" class="btn btn-neutral" title="Customization"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../../quickstart/customization/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../resolved-variables/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

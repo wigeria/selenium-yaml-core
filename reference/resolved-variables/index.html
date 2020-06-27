@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <link rel="shortcut icon" href="../../img/favicon.ico">
+  <title>Resolved Variables - SeleniumYAML</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="../../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Resolved Variables";
+    var mkdocs_page_input_path = "reference\\resolved-variables.md";
+    var mkdocs_page_url = null;
+  </script>
+  
+  <script src="../../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href="../.." class="icon icon-home"> SeleniumYAML</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Quickstart</span></p>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../../quickstart/installation/">Installation</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../quickstart/basic-usage/">Basic Usage</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../../quickstart/customization/">Customization</a>
+                    </li>
+                </ul>
+                <p class="caption"><span class="caption-text">Reference</span></p>
+                <ul class="current">
+                    <li class="toctree-l1"><a class="reference internal" href="../steps/">Steps</a>
+                    </li>
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Resolved Variables</a>
+    <ul class="current">
+    </ul>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../fields/">Fields</a>
+                    </li>
+                    <li class="toctree-l1"><a class="reference internal" href="../validators/">Validators</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../..">SeleniumYAML</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../..">Docs</a> &raquo;</li>
+    
+      
+        
+          <li>Reference &raquo;</li>
+        
+      
+    
+    <li>Resolved Variables</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="resolved-variables">Resolved Variables</h1>
+<p>Resolved Variables are template variables that can be added to steps in bots that are rendered right before the execution of the step using all of the context stored prior to it's execution. Note that these variables are <strong>not</strong> rendered in the <code>title</code> and <code>action</code> fields for the steps, since those are used prior to the actual execution.</p>
+<p>All of the data returned by a Step's <code>perform()</code> method (note that this should always be None or a Dict) is stored in the performance context under that Step's Namespace (it's <code>title</code>).</p>
+<p>Resolved Variables allow for nested access using double underscores (<code>__</code>).</p>
+<h1 id="schema">Schema</h1>
+<p>Resolved Variables can be added to the bots using by enclosing variables in <code>${...}</code> brackets. Spaces are allowed inside the brackets, as well as certain functions defined <a href="#functions">here</a></p>
+<h2 id="accessing-nested-fields">Accessing Nested Fields</h2>
+<p>Context data can be nested infinitely and can be accessed by passing through levels using <code>__</code>.</p>
+<p>For example, if we had a <a href="/reference/steps/#CallAPIStep">CallAPIStep</a> step titled <code>Call an API</code> (which stores the response body in the <code>context</code> variable) which received a JSON response of <code>{key1: {key2: value}}</code>, we could access <code>value</code> using the following in any of the following steps:</p>
+<pre><code>${Call an API__content__key1__key2}
+</code></pre>
+
+<p>If we received a response of <code>{key1: [value1, value2, value3]}</code> however, and we wanted to access <code>value3</code>, we could retreive that through it's zero-index as follows:</p>
+<pre><code>${Call an API__content__key1__2}
+</code></pre>
+
+<p>These two formats can be used as required to traverse through dictionaries and lists.</p>
+<h2 id="using-functions">Using Functions</h2>
+<p>Certain functions can be used for modifying resolved variables for more complex use cases. The functions available depend on the type of variable they're being used against.</p>
+<p>These can be used through the <code>|</code> (pipe) symbol. For example, if we wanted to us the split function to separate a string by <code>,</code> and get the first value, we could do the following:</p>
+<pre><code>${Step Title__string_variable|split(',')__0}
+</code></pre>
+
+<h3 id="strings">Strings</h3>
+<ul>
+<li><code>split(delim, maxsplit=None)</code> - Splits the string by the given delimiter.</li>
+<li><code>upper()</code> - Uppercases the entire string</li>
+<li><code>lower()</code> - Lowercasess the entire string</li>
+<li><code>capitalize()</code> - Capitalizes the first letter of the string</li>
+<li><code>zfill(width)</code> - Adds zeroes before the string so that it reaches the required width</li>
+<li><code>strip()</code> - Strips spaces from before and after the string</li>
+<li><code>len()</code> - Gives back the length of the string as an integer</li>
+<li><code>startswith(prefix)</code> - Returns a boolean based on whether a string starts with a value or not</li>
+<li><code>endswith(prefix)</code> - Returns a boolean based on whether a string ends with a value or not</li>
+</ul>
+<h3 id="list">List</h3>
+<ul>
+<li><code>len()</code> - Returns the length of the string as an integer</li>
+<li><code>index(value)</code> - Returns the index of the given value in the list</li>
+<li><code>reverse()</code> - Returns the list in reverse</li>
+<li><code>sort()</code> - Returns the sorted list</li>
+<li><code>join(delim)</code> - Returns the list joined by the delimiter as a string</li>
+</ul>
+<h3 id="dict">Dict</h3>
+<ul>
+<li><code>get(key, default=None)</code> - Returns the key if it exists in the dict, otherwise returns the default if provided</li>
+<li><code>keys()</code> - Returns a list of all keys in the dictionary</li>
+<li><code>items()</code> - Returns a list of tuples of all (key, value) pairs in the dictionary</li>
+</ul>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../fields/" class="btn btn-neutral float-right" title="Fields">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../steps/" class="btn btn-neutral" title="Steps"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+        <span><a href="../steps/" style="color: #fcfcfc;">&laquo; Previous</a></span>
+      
+      
+        <span style="margin-left: 15px"><a href="../fields/" style="color: #fcfcfc">Next &raquo;</a></span>
+      
+    </span>
+</div>
+    <script>var base_url = '../..';</script>
+    <script src="../../js/theme.js" defer></script>
+      <script src="../../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>
