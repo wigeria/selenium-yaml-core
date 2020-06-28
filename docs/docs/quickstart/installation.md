@@ -39,4 +39,4 @@ Finally done with the dependencies. Installing SeleniumYAML is simple; just run 
 pip install selenium-yaml
 ```
 
-You can confirm that you've installed it successfully by running `run_sally --version`.
+You can confirm that you've installed it successfully by running `run_sally.py --version`.
