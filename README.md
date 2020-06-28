@@ -9,10 +9,6 @@ For in-depth documentation, head over to our [GH-Pages site](https://wigeria.git
 
 As long as the dependencies are installed, and you're using Python>=3.6, the CLI can be run directly by using:
 
-```python -m scripts.run_sally```
+```run_sally.py --yaml-file=path/to/bot/yaml```
 
 <sub><sup>Use the `--help` argument for details on the CLI!</sup></sub>
-
-## Todos
-
-- [ ] Deploy on PyPi
