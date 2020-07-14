@@ -64,7 +64,7 @@ class SeleniumYAML:
         # the moment it just returns ""
         assert yaml_file, "YAML not provided"
         if isinstance(yaml_file, str) and os.path.exists(yaml_file):
-            with open(yaml_file) as inf:
+            with open(yaml_file, encoding="UTF-8") as inf:
                 yaml_file = inf.read()
 
         # These are set as class attributes so that they can be passed to any
