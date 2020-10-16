@@ -14,7 +14,7 @@ from selenium_yaml import exceptions
 from selenium_yaml.parsers import YAMLParser
 
 __title__ = 'SeleniumYAML'
-__version__ = '1.0.3'
+__version__ = '1.0.5'
 __author__ = 'Abhishek Verma'
 __license__ = 'Apache 2.0'
 __copyright__ = 'Copyright 2020 Abhishek Verma'
