@@ -19,6 +19,10 @@ class YAMLParser:
     """ Parser that expects a file-like object containing Steps data in a
         YAML format
 
+        The YAML can optionally also include ``exception_steps`` which are
+        triggered by the engine for any exceptions encountered during
+        performance
+
         Each step in the YAML is validated individually and the data is only
         accessible if each step is valid
 
@@ -41,6 +45,14 @@ class YAMLParser:
             isinstance(self.yaml_data["steps"], list), (
                 "The ``steps`` in the YAML are not in a list format."
             )
+        # Defaulting the exception steps to a list if not present, otherwise
+        # validating that they're provided as a list
+        if "exception_steps" not in self.yaml_data:
+            self.yaml_data["exception_steps"] = []
+        else:
+            assert isinstance(self.yaml_data["exception_steps"], list), (
+                "``exception_steps`` must be provided in a list format."
+            )
         self.bot_title = self.yaml_data["title"]
 
         self._validated_steps = None
@@ -48,42 +60,62 @@ class YAMLParser:
 
     def validate(self):
         """ Validates the ``yaml_data`` attribute and initializes the steps
-            that are valid
+            and exception_steps that are valid
 
-            Sets the ``_validated_steps`` and ``_errors`` properties
+            Sets the ``_validated_steps``, ``_validated_exception_steps``
+            and ``_errors`` properties
         """
         self._validated_steps = OrderedDict()
+        self._validated_exception_steps = OrderedDict()
         self._errors = {}
         for step in self.yaml_data["steps"]:
-            # Validates that the step has a unique title first of all so
-            # that errors can be assigned to the correct step title
-            step_title = step.pop("title", None)
-            if not step_title:
-                self._errors = {"<unknown>": MISSING_TITLE_ERROR}
-                self._validated_steps = OrderedDict()
-                raise ValueError(MISSING_TITLE_ERROR)
-            elif step_title in self._validated_steps:
-                self._errors[step_title] = [DUPLICATE_ERROR]
-            elif step_title in self._errors:
-                self._errors[step_title].append(DUPLICATE_ERROR)
-            # Then validates that the step's action is registered
-            try:
-                step_cls = get_registered_step(step.pop("action", None))
-            except KeyError:
-                self._errors[step_title] = f"{step_title}'s ``step_cls`` " + \
-                    "not found."
-                continue
-            # Then validates that the step has a valid set of data
-            step_cls = step_cls(step_data=step, title=step_title)
-            if not step_cls.is_valid():
-                self._errors[step_title] = step_cls.errors
-            else:
-                self._validated_steps[step_title] = step_cls
+            self.validate_step(step, self._validated_steps)
+        for exception_step in self.yaml_data["exception_steps"]:
+            self.validate_step(exception_step, self._validated_exception_steps)
 
         if self._errors:
             self._validated_steps = OrderedDict()
+            self._validated_exception_steps = OrderedDict()
             return False
         return True
+
+    def validate_step(self, step, validated_array):
+        """ Validates the given ``step`` dictionary through a provided
+            set of rules;
+            The validated step is then stored in the ``validated_array``
+            array; this is specified since some steps may be
+            destined for different locations:
+                ``validated_steps`` and ``validated_exception_steps``
+
+            The ``title`` is required, and must be unique.
+            The ``action`` must point to a registered Step class
+            The other data provided in the step must be validated successfullly
+            against the Step class identified by ``action``
+        """
+        # Validates that the step has a unique title first of all so
+        # that errors can be assigned to the correct step title
+        step_title = step.pop("title", None)
+        if not step_title:
+            self._errors = {"<unknown>": MISSING_TITLE_ERROR}
+            validated_array = OrderedDict()
+            raise ValueError(MISSING_TITLE_ERROR)
+        elif step_title in validated_array:
+            self._errors[step_title] = [DUPLICATE_ERROR]
+        elif step_title in self._errors:
+            self._errors[step_title].append(DUPLICATE_ERROR)
+        # Then validates that the step's action is registered
+        try:
+            step_cls = get_registered_step(step.pop("action", None))
+        except KeyError:
+            self._errors[step_title] = f"{step_title}'s ``step_cls`` " + \
+                "not found."
+            return
+        # Then validates that the step has a valid set of data
+        step_cls = step_cls(step_data=step, title=step_title)
+        if not step_cls.is_valid():
+            self._errors[step_title] = step_cls.errors
+        else:
+            validated_array[step_title] = step_cls
 
     def is_valid(self):
         """ Validates the ``yaml_data`` attribute using the ``validate``
@@ -104,6 +136,14 @@ class YAMLParser:
             "validated steps"
         )
         return self._validated_steps
+
+    @property
+    def validated_exception_steps(self):
+        assert self._validated_exception_steps is not None, (
+            "``is_valid`` must be called successfully prior to accessing the "
+            "validated exception steps"
+        )
+        return self._validated_exception_steps
 
     @property
     def errors(self):

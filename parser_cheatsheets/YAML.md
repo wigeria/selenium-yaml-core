@@ -10,6 +10,8 @@ Contains schema for the base steps in a YAML format
 title: Bot Title
 steps:
   - An array item for each step
+exception_steps:
+  - An array item for each step that should be executed after an error
 ```
 
 

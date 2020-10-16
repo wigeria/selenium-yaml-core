@@ -80,6 +80,7 @@ class SeleniumYAML:
         if parser.is_valid():
             self.steps = parser.validated_steps
             self.title = parser.bot_title
+            self.exception_steps = parser.validated_exception_steps
         else:
             raise exceptions.ValidationError(parser.errors)
 
@@ -117,6 +118,28 @@ class SeleniumYAML:
         self.driver.quit()
         self.driver = None
 
+    @logger.catch(reraise=True)
+    def run_exception_steps(self):
+        """ Runs the exception steps in order with the provided step data
+
+            Note that any exceptions on these are simply logged and otherwise
+            ignored. For that reason, any exception tests must be tested
+            carefully themselves
+
+        """
+        for step_title, exception_step in self.exception_steps.items():
+            try:
+                step_data = exception_step.run_step(
+                    self.driver,
+                    self.performance_context,
+                    save_screenshots=False)
+            except:
+                logger.exception(
+                    "Ran into an exception while performing exception " +
+                    "step: {step_title}",
+                    step_title=step_title
+                )
+
     def perform(self, quit_driver=True):
         """ Iterates over and performs each step individually
             If ``quit_driver`` is False, it doesn't quit the driver after performance
@@ -136,7 +159,11 @@ class SeleniumYAML:
                     "Ran into an exception while performing {step_title}",
                     step_title=step_title
                 )
+                self.run_exception_steps()
                 break
+            except:
+                self.run_exception_steps()
+                raise
             self.performance_context[step_title] = step_data
         logger.debug("Step performance sequence finished.")
         if quit_driver:
