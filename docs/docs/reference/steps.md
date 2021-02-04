@@ -160,7 +160,7 @@ This step is used for sending a request with the given details and storing the r
 - **`iterator`** - `ResolvedVariableField(required_type=list)` field for the array to iterate over
 - **`steps`** - `NestedStepsField` containing an array of steps that should be performed for each element in the `iterator`
 
-This step is used to perform all of the steps in the `steps` array for each element in the `iterator`. The context for each iteration is stored under the `step_title__iter_index__sub_step_title` namespace. The `iterator` could also be a resolved variable if required. In the steps in the iterator, a performance context variable for the current element being iterated over is available at `${current_iterator}`.
+This step is used to perform all of the steps in the `steps` array for each element in the `iterator`. The context for each iteration is stored under the `step_title__iter_index__sub_step_title` namespace. The `iterator` could also be a resolved variable if required. In the steps in the iterator, a performance context variable for the current element being iterated over is available at `${current_iterator}` (and indices at `${current_index_zero}` and `${current_index_one}`.
 
 ## ConditionalStep
 

@@ -239,6 +239,8 @@ class IteratorStep(BaseStep):
         # the `__iter_index__step_title` namespace under this step
         for index, item in enumerate(iterator):
             performance_context["current_iterator"] = item
+            performance_context["current_index_zero"] = index
+            performance_context["current_index_one"] = index+1
             index = str(index)
             step_context[index] = {}
             for step_title, step in steps.items():
