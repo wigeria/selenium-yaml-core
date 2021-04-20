@@ -19,7 +19,7 @@ packaging==20.3
 pip-api==0.0.14
 pipreqs==0.4.10
 pluggy==0.13.1
-py==1.8.1
+py==1.10.0
 pylint==2.5.2
 pyparsing==2.4.7
 pytest==5.4.2
