@@ -13,9 +13,9 @@ conf_files = {
 }
 requirements = [
     "selenium>=3.141.0",
-    "Jinja2",
+    "Jinja2==2.11.3",
     "loguru",
-    "PyYAML",
+    "PyYAML==5.4",
     "requests"
 ]
 
@@ -26,7 +26,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="selenium-yaml",
-    version="1.0.6",
+    version="1.0.8",
     author="Abhishek Verma",
     author_email="wigeriaaeriag@gmail.com",
     description="Selenium bots using YAML",
