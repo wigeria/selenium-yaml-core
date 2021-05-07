@@ -32,7 +32,7 @@ class YAMLParser:
         """ Parses the given ``yaml_file`` and validates and initializes the
             included steps
         """
-        self.yaml_data = yaml.load(yaml_file)
+        self.yaml_data = yaml.safe_load(yaml_file)
 
         assert isinstance(self.yaml_data, dict), (
             "Invalid YAML Schema. The data must be in a format of "
