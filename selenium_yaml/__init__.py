@@ -139,6 +139,8 @@ class SeleniumYAML:
                     "step: {step_title}",
                     step_title=step_title
                 )
+            else:
+                self.performance_context[step_title] = step_data
 
     def perform(self, quit_driver=True):
         """ Iterates over and performs each step individually
