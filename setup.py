@@ -26,7 +26,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="selenium-yaml",
-    version="1.0.8",
+    version="1.0.9",
     author="Abhishek Verma",
     author_email="wigeriaaeriag@gmail.com",
     description="Selenium bots using YAML",
