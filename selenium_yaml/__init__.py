@@ -6,6 +6,7 @@ Basic Usage:
 """
 import os
 
+from collections import OrderedDict
 from jinja2 import Template
 from loguru import logger
 from selenium import webdriver
@@ -85,7 +86,7 @@ class SeleniumYAML:
             raise exceptions.ValidationError(parser.errors)
 
         self.save_screenshots = save_screenshots
-        self.performance_context = {}
+        self.performance_context = OrderedDict()
 
         if isinstance(driver, webdriver.remote.webdriver.WebDriver):
             self.driver = driver
