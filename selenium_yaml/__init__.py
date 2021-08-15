@@ -11,6 +11,7 @@ from jinja2 import Template
 from loguru import logger
 from random import uniform
 from selenium import webdriver
+import time
 
 from selenium_yaml import exceptions
 from selenium_yaml.parsers import YAMLParser
@@ -175,7 +176,7 @@ class SeleniumYAML:
                 raise
             self.performance_context[step_title] = step_data
             if dynamic_delay_range:
-                uniform(*dynamic_delay_range)
+                time.sleep(uniform(*dynamic_delay_range))
         logger.debug("Step performance sequence finished.")
         if quit_driver:
             self.__quit_driver()
