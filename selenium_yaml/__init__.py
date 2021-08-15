@@ -9,13 +9,14 @@ import os
 from collections import OrderedDict
 from jinja2 import Template
 from loguru import logger
+from random import uniform
 from selenium import webdriver
 
 from selenium_yaml import exceptions
 from selenium_yaml.parsers import YAMLParser
 
 __title__ = 'SeleniumYAML'
-__version__ = '1.0.5'
+__version__ = '1.0.95'
 __author__ = 'Abhishek Verma'
 __license__ = 'Apache 2.0'
 __copyright__ = 'Copyright 2020 Abhishek Verma'
@@ -143,9 +144,14 @@ class SeleniumYAML:
             else:
                 self.performance_context[step_title] = step_data
 
-    def perform(self, quit_driver=True):
+    def perform(self, quit_driver=True, dynamic_delay_range=None):
         """ Iterates over and performs each step individually
-            If ``quit_driver`` is False, it doesn't quit the driver after performance
+            If ``quit_driver`` is False, it doesn't quit the driver after
+            performance
+            
+            If ``dynamic_delay_range`` is provided as a tuple of
+            `(min, max)` seconds, a random delay between that range is added
+            between each step's execution
         """
         logger.debug("Starting step performance sequence...")
         assert self.driver, "Driver must be initialized prior to performance."
@@ -168,6 +174,8 @@ class SeleniumYAML:
                 self.run_exception_steps()
                 raise
             self.performance_context[step_title] = step_data
+            if dynamic_delay_range:
+                uniform(*dynamic_delay_range)
         logger.debug("Step performance sequence finished.")
         if quit_driver:
             self.__quit_driver()
