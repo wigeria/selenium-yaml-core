@@ -17,7 +17,7 @@ from selenium_yaml import exceptions
 from selenium_yaml.parsers import YAMLParser
 
 __title__ = 'SeleniumYAML'
-__version__ = '1.0.96'
+__version__ = '1.0.97'
 __author__ = 'Abhishek Verma'
 __license__ = 'Apache 2.0'
 __copyright__ = 'Copyright 2020 Abhishek Verma'
@@ -149,7 +149,7 @@ class SeleniumYAML:
         """ Iterates over and performs each step individually
             If ``quit_driver`` is False, it doesn't quit the driver after
             performance
-            
+
             If ``dynamic_delay_range`` is provided as a tuple of
             `(min, max)` seconds, a random delay between that range is added
             between each step's execution
