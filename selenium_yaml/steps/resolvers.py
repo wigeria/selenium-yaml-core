@@ -31,9 +31,9 @@ FUNCTIONS = {
     },
     "dict": {
         "get": lambda key, default=None, resolved_value=None: (
-            resolved_value.get(key, default=default)),
-        "keys": lambda resolved_value=None: resolved_value.keys(),
-        "items": lambda resolved_value=None: resolved_value.items()
+            resolved_value.get(key, default)),
+        "keys": lambda resolved_value=None: dict(resolved_value.keys()),
+        "items": lambda resolved_value=None: list(resolved_value.items()),
     },
     "list": {
         "len": len_function,
