@@ -12,7 +12,7 @@ isort==4.3.21
 Jinja2==2.11.3
 lazy-object-proxy==1.4.3
 loguru==0.5.3
-MarkupSafe==1.1.1
+MarkupSafe==2.0.1
 mccabe==0.6.1
 more-itertools==8.3.0
 packaging==20.3
@@ -24,10 +24,10 @@ pylint==2.5.2
 pyparsing==2.4.7
 pytest==5.4.2
 pytest-cov==2.8.1
-PyYAML==5.4
+PyYAML==6.0
 requests==2.31.0
 requests-mock==1.8.0
-selenium==3.141.0
+selenium==4.27.1
 six==1.14.0
 toml==0.10.0
 typed-ast==1.4.1

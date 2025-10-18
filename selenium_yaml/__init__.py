@@ -11,13 +11,14 @@ from jinja2 import Template
 from loguru import logger
 from random import uniform
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
 import time
 
 from selenium_yaml import exceptions
 from selenium_yaml.parsers import YAMLParser
 
 __title__ = 'SeleniumYAML'
-__version__ = '1.0.97'
+__version__ = '1.0.98'
 __author__ = 'Abhishek Verma'
 __license__ = 'Apache 2.0'
 __copyright__ = 'Copyright 2020 Abhishek Verma'
@@ -111,7 +112,7 @@ class SeleniumYAML:
             compatible with the provided driver classs
         """
         return self.driver_class(options=self.driver_options,
-                                 executable_path=self.driver_executable_path)
+                                 service=ChromeService(executable_path=self.driver_executable_path))
 
     def __quit_driver(self):
         """ Quits the driver on the instance, and sets the attribute to
