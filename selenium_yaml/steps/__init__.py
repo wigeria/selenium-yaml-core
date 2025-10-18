@@ -11,6 +11,7 @@ import types
 from loguru import logger
 
 import selenium_yaml.exceptions as exceptions
+from selenium.webdriver.common.by import By
 from selenium_yaml.steps import resolvers
 
 
@@ -117,7 +118,7 @@ class BaseStep:
 
         fname = os.path.join(screenshots_path, f"{self.title}.png")
         with open(fname, 'wb') as outf:
-            el = driver.find_element_by_tag_name('body')
+            el = driver.find_element(By.TAG_NAME, 'body')
             outf.write(el.screenshot_as_png)
         return fname
 

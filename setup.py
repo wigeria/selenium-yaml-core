@@ -12,11 +12,12 @@ conf_files = {
     "README": "README.md",
 }
 requirements = [
-    "selenium>=3.141.0",
+    "selenium==4.27.1",
     "Jinja2==2.11.3",
     "loguru",
-    "PyYAML==5.4",
-    "requests"
+    "PyYAML==6.0",
+    "requests",
+    "markupsafe==2.0.1",
 ]
 
 
@@ -26,7 +27,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="selenium-yaml",
-    version="1.0.97",
+    version="1.0.98",
     author="Abhishek Verma",
     author_email="wigeriaaeriag@gmail.com",
     description="Selenium bots using YAML",
@@ -35,7 +36,8 @@ setuptools.setup(
     url="https://github.com/wigeria/selenium-yaml-core",
     packages=setuptools.find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
         "Topic :: Software Development :: Testing",
@@ -43,7 +45,7 @@ setuptools.setup(
         "Development Status :: 3 - Alpha",
         "Natural Language :: English",
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.9',
     scripts=["scripts/run_sally.py"],
     install_requires=requirements
 )
